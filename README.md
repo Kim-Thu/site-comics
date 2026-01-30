@@ -66,7 +66,7 @@
 ┌──────────────┐    ┌──────────────┐    ┌──────────────┐
 │   FRONTEND   │    │     CMS      │    │   MOBILE     │
 │  (Next.js)   │    │   (React)    │    │   (Future)   │
-│  Port: 3000  │    │  Port: 5173  │    │              │
+│  Port: 3000  │    │  Port: 3002  │    │              │
 └──────────────┘    └──────────────┘    └──────────────┘
         │                   │                   │
         └───────────────────┼───────────────────┘
@@ -419,7 +419,7 @@ Kết quả thành công:
  ✓ Ready in 2.5s
 ```
 
-#### Terminal 3 - CMS (Port 5173):
+#### Terminal 3 - CMS (Port 3002):
 ```bash
 cd cms
 npm run dev
@@ -429,8 +429,8 @@ Kết quả thành công:
 ```
   VITE v5.x.x  ready in 500 ms
 
-  ➜  Local:   http://localhost:5173/
-  ➜  Network: http://192.168.x.x:5173/
+  ➜  Local:   http://localhost:3002/
+  ➜  Network: http://192.168.x.x:3002/
 ```
 
 ### Bước 7: Truy Cập Ứng Dụng
@@ -438,7 +438,7 @@ Kết quả thành công:
 | Ứng dụng | URL | Mô tả |
 |----------|-----|-------|
 | **Frontend** | http://localhost:3000 | Website người dùng |
-| **CMS** | http://localhost:5173 | Bảng điều khiển admin |
+| **CMS** | http://localhost:3002 | Bảng điều khiển admin |
 | **API** | http://localhost:3001 | Backend API |
 
 ---
@@ -447,7 +447,7 @@ Kết quả thành công:
 
 ### 🔐 Đăng Nhập CMS
 
-1. Truy cập http://localhost:5173
+1. Truy cập http://localhost:3002
 2. Sử dụng tài khoản mặc định:
    ```
    Email: admin@example.com
