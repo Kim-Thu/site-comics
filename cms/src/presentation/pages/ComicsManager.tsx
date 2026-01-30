@@ -1,4 +1,4 @@
-import { Check, Edit2, ExternalLink, List, Plus, Search, Trash2 } from 'lucide-react';
+import { Check, Edit2, ExternalLink, List, Plus, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +6,9 @@ import { Comic } from '../../core/interfaces';
 import { comicService } from '../../infrastructure/api.service';
 import Accordion from '../components/Accordion';
 import ConfirmModal from '../components/ConfirmModal';
+import PageHeader from '../components/PageHeader';
+import SearchInput from '../components/SearchInput';
+import { TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../components/Table';
 
 const ComicsManager = () => {
     const [comics, setComics] = useState<Comic[]>([]);
@@ -128,55 +131,42 @@ const ComicsManager = () => {
     return (
         <div className="space-y-6 animate-fade-in font-inter">
             {/* Header */}
-            <div className="flex justify-between items-center bg-[#111114] p-4 rounded-2xl border border-white/10">
-                <div>
-                    <h1 className="text-2xl font-bold text-zinc-100 font-outfit uppercase">Quản lý truyện</h1>
-                    <p className="text-zinc-500 text-xs">
-                        Tổng cộng {comics.length} truyện
-                        {selectedIds.size > 0 && (
-                            <span className="ml-2 text-indigo-400 font-bold">
-                                • {selectedIds.size} đã chọn
-                            </span>
-                        )}
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-4">
-                    {selectedIds.size > 0 && (
-                        <button
-                            onClick={handleBulkDelete}
-                            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-sm font-bold transition-colors"
-                        >
-                            <Trash2 size={16} />
-                            Xóa {selectedIds.size} truyện
-                        </button>
-                    )}
-
-                    <div className="relative w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Tìm kiếm truyện..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-zinc-300 focus:outline-none focus:border-indigo-500"
-                        />
-                    </div>
-
+            <PageHeader
+                title="Quản lý truyện"
+                description={`Tổng cộng ${comics.length} truyện`}
+            >
+                {selectedIds.size > 0 && (
                     <button
-                        onClick={() => navigate('/comics/create')}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
+                        onClick={handleBulkDelete}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-sm font-bold transition-colors"
                     >
-                        <Plus size={18} />
-                        Thêm truyện
+                        <Trash2 size={16} />
+                        Xóa {selectedIds.size} truyện
                     </button>
-                </div>
-            </div>
+                )}
+
+                <SearchInput
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    placeholder="Tìm kiếm truyện..."
+                    className="w-64"
+                />
+
+                <button
+                    onClick={() => navigate('/comics/create')}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
+                >
+                    <Plus size={18} />
+                    Thêm truyện
+                </button>
+            </PageHeader>
 
             {/* Content */}
             <div className="space-y-4">
                 {loading ? (
-                    <div className="flex items-center justify-center h-64 text-zinc-500">Đang tải...</div>
+                    <div className="flex items-center justify-center h-64 text-zinc-500">
+                        <List className="animate-pulse mr-2" /> Đang tải...
+                    </div>
                 ) : comics.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-zinc-500 gap-4">
                         <List size={48} className="opacity-20" />
@@ -211,111 +201,100 @@ const ComicsManager = () => {
                                 count={statusComics.length}
                                 defaultOpen={true}
                             >
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead>
-                                            <tr className="border-b border-white/5 text-left">
-                                                <th className="p-3 text-xs font-bold text-zinc-500 uppercase w-12"></th>
-                                                <th className="p-3 text-xs font-bold text-zinc-500 uppercase">Truyện</th>
-                                                <th className="p-3 text-xs font-bold text-zinc-500 uppercase">Tác giả</th>
-                                                <th className="p-3 text-xs font-bold text-zinc-500 uppercase">Thể loại</th>
-                                                <th className="p-3 text-xs font-bold text-zinc-500 uppercase">Lượt xem</th>
-                                                <th className="p-3 text-xs font-bold text-zinc-500 uppercase text-right">Thao tác</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {statusComics.map((comic, index) => {
-                                                const globalIndex = comics.findIndex(c => c.id === comic.id);
-                                                const isSelected = selectedIds.has(comic.id);
+                                <TableContainer className="rounded-none shadow-none border-0">
+                                    <TableHeader>
+                                        <TableHead className="w-12"></TableHead>
+                                        <TableHead>Truyện</TableHead>
+                                        <TableHead>Tác giả</TableHead>
+                                        <TableHead>Thể loại</TableHead>
+                                        <TableHead>Lượt xem</TableHead>
+                                        <TableHead align="right">Thao tác</TableHead>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {statusComics.map((comic, index) => {
+                                            const globalIndex = comics.findIndex(c => c.id === comic.id);
+                                            const isSelected = selectedIds.has(comic.id);
 
-                                                return (
-                                                    <tr
-                                                        key={comic.id}
-                                                        onClick={(e) => handleRowClick(comic, globalIndex, e)}
-                                                        className={`
-                                                            border-b border-white/5 transition-all cursor-pointer
-                                                            ${isSelected
-                                                                ? 'bg-indigo-500/10 border-indigo-500/30'
-                                                                : 'hover:bg-white/[0.02]'
-                                                            }
-                                                        `}
-                                                    >
-                                                        <td className="p-3">
-                                                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isSelected
-                                                                ? 'bg-indigo-500 border-indigo-500'
-                                                                : 'border-white/20'
-                                                                }`}>
-                                                                {isSelected && <Check size={14} className="text-white" />}
+                                            return (
+                                                <TableRow
+                                                    key={comic.id}
+                                                    onClick={(e) => handleRowClick(comic, globalIndex, e)}
+                                                    className={isSelected ? 'bg-indigo-500/10 border-indigo-500/30' : ''}
+                                                >
+                                                    <TableCell>
+                                                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isSelected
+                                                            ? 'bg-indigo-500 border-indigo-500'
+                                                            : 'border-white/20'
+                                                            }`}>
+                                                            {isSelected && <Check size={14} className="text-white" />}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-3">
+                                                            <img
+                                                                src={comic.thumbnail}
+                                                                alt={comic.title}
+                                                                className="w-12 h-16 object-cover rounded border border-white/10"
+                                                            />
+                                                            <div>
+                                                                <div className="font-bold text-zinc-200 text-sm">{comic.title}</div>
                                                             </div>
-                                                        </td>
-                                                        <td className="p-3">
-                                                            <div className="flex items-center gap-3">
-                                                                <img
-                                                                    src={comic.thumbnail}
-                                                                    alt={comic.title}
-                                                                    className="w-12 h-16 object-cover rounded border border-white/10"
-                                                                />
-                                                                <div>
-                                                                    <div className="font-bold text-zinc-200 text-sm">{comic.title}</div>
-
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td className="p-3 text-sm text-zinc-400">{comic.author}</td>
-                                                        <td className="p-3">
-                                                            <div className="flex flex-wrap gap-1">
-                                                                {comic.categories?.slice(0, 2).map((cat: any) => (
-                                                                    <span key={cat.id} className="px-2 py-0.5 bg-white/5 rounded text-xs text-zinc-400">
-                                                                        {cat.name}
-                                                                    </span>
-                                                                ))}
-                                                                {(comic.categories?.length || 0) > 2 && (
-                                                                    <span className="px-2 py-0.5 bg-white/5 rounded text-xs text-zinc-500">
-                                                                        +{(comic.categories?.length || 0) - 2}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                        <td className="p-3 text-sm text-zinc-400">{comic.views?.toLocaleString() || 0}</td>
-                                                        <td className="p-3">
-                                                            <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                                                                <button
-                                                                    onClick={() => navigate(`/comics/${comic.id}/chapters`)}
-                                                                    className="p-2.5 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-400/10 rounded-xl transition-all bg-transparent border-none active:scale-90"
-                                                                    title="Quản lý chương"
-                                                                >
-                                                                    <List size={18} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => navigate(`/comics/edit/${comic.id}`)}
-                                                                    className="p-2.5 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-400/10 rounded-xl transition-all bg-transparent border-none active:scale-90"
-                                                                    title="Chỉnh sửa"
-                                                                >
-                                                                    <Edit2 size={18} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => setDeleteConfirm({ show: true, id: comic.id, title: comic.title })}
-                                                                    className="p-2.5 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all bg-transparent border-none active:scale-90"
-                                                                    title="Xóa"
-                                                                >
-                                                                    <Trash2 size={18} />
-                                                                </button>
-                                                                <a
-                                                                    href={`http://localhost:3000/comic/${comic.slug}`}
-                                                                    target="_blank"
-                                                                    rel="noreferrer"
-                                                                    className="p-2.5 text-zinc-500 hover:text-white hover:bg-white/10 rounded-xl transition-all active:scale-90 flex"
-                                                                >
-                                                                    <ExternalLink size={18} />
-                                                                </a>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-sm text-zinc-400">{comic.author}</TableCell>
+                                                    <TableCell>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {comic.categories?.slice(0, 2).map((cat: any) => (
+                                                                <span key={cat.id} className="px-2 py-0.5 bg-white/5 rounded text-xs text-zinc-400">
+                                                                    {cat.name}
+                                                                </span>
+                                                            ))}
+                                                            {(comic.categories?.length || 0) > 2 && (
+                                                                <span className="px-2 py-0.5 bg-white/5 rounded text-xs text-zinc-500">
+                                                                    +{(comic.categories?.length || 0) - 2}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-sm text-zinc-400">{comic.views?.toLocaleString() || 0}</TableCell>
+                                                    <TableCell align="right">
+                                                        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                                            <button
+                                                                onClick={() => navigate(`/comics/${comic.id}/chapters`)}
+                                                                className="p-2.5 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-400/10 rounded-xl transition-all bg-transparent border-none active:scale-90"
+                                                                title="Quản lý chương"
+                                                            >
+                                                                <List size={18} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => navigate(`/comics/edit/${comic.id}`)}
+                                                                className="p-2.5 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-400/10 rounded-xl transition-all bg-transparent border-none active:scale-90"
+                                                                title="Chỉnh sửa"
+                                                            >
+                                                                <Edit2 size={18} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setDeleteConfirm({ show: true, id: comic.id, title: comic.title })}
+                                                                className="p-2.5 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all bg-transparent border-none active:scale-90"
+                                                                title="Xóa"
+                                                            >
+                                                                <Trash2 size={18} />
+                                                            </button>
+                                                            <a
+                                                                href={`http://localhost:3000/comic/${comic.slug}`}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="p-2.5 text-zinc-500 hover:text-white hover:bg-white/10 rounded-xl transition-all active:scale-90 flex"
+                                                            >
+                                                                <ExternalLink size={18} />
+                                                            </a>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+                                </TableContainer>
                             </Accordion>
                         ))}
                     </>

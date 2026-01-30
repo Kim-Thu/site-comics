@@ -1,9 +1,11 @@
-import { Check, Copy, Image as ImageIcon, Search, Trash2, Upload, X } from 'lucide-react';
+import { Check, Copy, Image as ImageIcon, Trash2, Upload, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { api } from '../../infrastructure/api.service';
+import { mediaService } from '../../infrastructure/api.service';
 import Accordion from '../components/Accordion';
 import ConfirmModal from '../components/ConfirmModal';
+import PageHeader from '../components/PageHeader';
+import SearchInput from '../components/SearchInput';
 
 interface Media {
     id: string;
@@ -47,11 +49,11 @@ const MediaManager = () => {
     const fetchMedia = async () => {
         try {
             setLoading(true);
-            const { data } = await api.get('/media', {
-                params: { page, limit: 24, search }
+            const { data, meta } = await mediaService.getMedia({
+                page, limit: 24, search
             });
-            setMedia(data.data);
-            setTotalPages(data.meta.last_page);
+            setMedia(data);
+            setTotalPages(meta.last_page);
         } catch (error) {
             console.error(error);
             toast.error('Không tải được thư viện ảnh');
@@ -63,12 +65,9 @@ const MediaManager = () => {
     const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (!e.target.files?.length) return;
         const file = e.target.files[0];
-        const formData = new FormData();
-        formData.append('file', file);
-
         try {
             setUploading(true);
-            await api.post('/media/upload', formData);
+            await mediaService.uploadImage(file);
             toast.success('Upload thành công');
             fetchMedia();
         } catch (error) {
@@ -84,13 +83,13 @@ const MediaManager = () => {
         try {
             if (deleteConfirm.ids && deleteConfirm.ids.length > 0) {
                 // Bulk delete
-                await Promise.all(deleteConfirm.ids.map(id => api.delete(`/media/${id}`)));
+                await Promise.all(deleteConfirm.ids.map(id => mediaService.deleteMedia(id)));
                 setMedia(media.filter(m => !deleteConfirm.ids!.includes(m.id)));
                 setSelectedIds(new Set());
                 toast.success(`Đã xóa ${deleteConfirm.ids.length} ảnh`);
             } else {
                 // Single delete
-                await api.delete(`/media/${deleteConfirm.id}`);
+                await mediaService.deleteMedia(deleteConfirm.id);
                 setMedia(media.filter(m => m.id !== deleteConfirm.id));
                 if (selectedMedia?.id === deleteConfirm.id) setSelectedMedia(null);
                 toast.success('Đã xóa');
@@ -102,7 +101,7 @@ const MediaManager = () => {
 
     const handleUpdate = async (id: string, data: Partial<Media>) => {
         try {
-            await api.patch(`/media/${id}`, data);
+            await mediaService.updateMedia(id, data);
             setMedia(media.map(m => m.id === id ? { ...m, ...data } : m));
             if (selectedMedia?.id === id) setSelectedMedia({ ...selectedMedia, ...data });
             toast.success('Đã cập nhật');
@@ -176,52 +175,37 @@ const MediaManager = () => {
         <div className="flex h-[calc(100vh-100px)] gap-6 font-inter">
             {/* Main Content */}
             <div className="flex-1 flex flex-col gap-6">
-                <div className="flex justify-between items-center bg-[#111114] p-4 rounded-2xl border border-white/10">
-                    <div>
-                        <h1 className="text-2xl font-bold text-zinc-100 font-outfit uppercase">Thư viện ảnh</h1>
-                        <p className="text-zinc-500 text-xs">
-                            Quản lý toàn bộ hình ảnh trên hệ thống
-                            {selectedIds.size > 0 && (
-                                <span className="ml-2 text-indigo-400 font-bold">
-                                    • {selectedIds.size} đã chọn
-                                </span>
-                            )}
-                        </p>
-                    </div>
+                <PageHeader
+                    title="Thư viện ảnh"
+                    description={`Quản lý toàn bộ hình ảnh trên hệ thống${selectedIds.size > 0 ? ` • ${selectedIds.size} đã chọn` : ''}`}
+                >
+                    {selectedIds.size > 0 && (
+                        <button
+                            onClick={handleBulkDelete}
+                            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-sm font-bold transition-colors"
+                        >
+                            <Trash2 size={16} />
+                            Xóa {selectedIds.size} ảnh
+                        </button>
+                    )}
 
-                    <div className="flex items-center gap-4">
-                        {selectedIds.size > 0 && (
-                            <button
-                                onClick={handleBulkDelete}
-                                className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-sm font-bold transition-colors"
-                            >
-                                <Trash2 size={16} />
-                                Xóa {selectedIds.size} ảnh
-                            </button>
-                        )}
+                    <SearchInput
+                        value={search}
+                        onChange={setSearch}
+                        placeholder="Tìm kiếm ảnh..."
+                        className="w-64"
+                    />
 
-                        <div className="relative w-64">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
-                            <input
-                                type="text"
-                                placeholder="Tìm kiếm ảnh..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-zinc-300 focus:outline-none focus:border-indigo-500"
-                            />
-                        </div>
-
-                        <label className={`
-                            flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold cursor-pointer transition-all
-                            ${uploading ? 'bg-indigo-500/50 cursor-wait' : 'bg-indigo-500 hover:bg-indigo-600 active:scale-95'}
-                            text-white shadow-lg shadow-indigo-500/20
-                        `}>
-                            <Upload size={18} />
-                            {uploading ? 'Đang tải...' : 'Tải lên'}
-                            <input type="file" className="hidden" accept="image/*" onChange={handleUpload} disabled={uploading} />
-                        </label>
-                    </div>
-                </div>
+                    <label className={`
+                        flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold cursor-pointer transition-all
+                        ${uploading ? 'bg-indigo-500/50 cursor-wait' : 'bg-indigo-500 hover:bg-indigo-600 active:scale-95'}
+                        text-white shadow-lg shadow-indigo-500/20
+                    `}>
+                        <Upload size={18} />
+                        {uploading ? 'Đang tải...' : 'Tải lên'}
+                        <input type="file" className="hidden" accept="image/*" onChange={handleUpload} disabled={uploading} />
+                    </label>
+                </PageHeader>
 
                 <div className="flex-1 overflow-y-auto space-y-4">
                     {loading ? (
@@ -240,8 +224,8 @@ const MediaManager = () => {
                                     className="text-sm text-zinc-400 hover:text-white transition-colors flex items-center gap-2"
                                 >
                                     <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${selectedIds.size === media.length
-                                            ? 'bg-indigo-500 border-indigo-500'
-                                            : 'border-white/20'
+                                        ? 'bg-indigo-500 border-indigo-500'
+                                        : 'border-white/20'
                                         }`}>
                                         {selectedIds.size === media.length && <Check size={12} className="text-white" />}
                                     </div>
@@ -283,8 +267,8 @@ const MediaManager = () => {
 
                                                     {/* Selection Checkbox */}
                                                     <div className={`absolute top-2 left-2 w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isSelected
-                                                            ? 'bg-indigo-500 border-indigo-500'
-                                                            : 'bg-black/50 border-white/30 opacity-0 group-hover:opacity-100'
+                                                        ? 'bg-indigo-500 border-indigo-500'
+                                                        : 'bg-black/50 border-white/30 opacity-0 group-hover:opacity-100'
                                                         }`}>
                                                         {isSelected && <Check size={14} className="text-white" />}
                                                     </div>

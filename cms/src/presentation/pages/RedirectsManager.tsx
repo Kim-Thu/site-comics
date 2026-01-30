@@ -1,10 +1,13 @@
-import { ArrowRight, Edit2, Plus, Search, Trash2 } from 'lucide-react';
+import { ArrowRight, Edit2, Plus, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { api } from '../../infrastructure/api.service';
 import ConfirmModal from '../components/ConfirmModal';
 import CustomCheckbox from '../components/CustomCheckbox';
 import CustomSelect from '../components/CustomSelect';
+import PageHeader from '../components/PageHeader';
+import SearchInput from '../components/SearchInput';
+import { TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../components/Table';
 
 interface Redirect {
     id: string;
@@ -101,68 +104,66 @@ const RedirectsManager = () => {
 
     return (
         <div className="space-y-6 animate-fade-in font-inter">
-            <div className="flex justify-between items-center bg-[#111114] p-4 rounded-2xl border border-white/10">
-                <div>
-                    <h1 className="text-2xl font-bold text-zinc-100 font-outfit uppercase">Redirect Links</h1>
-                    <p className="text-zinc-500 text-xs">Quản lý chuyển hướng đường dẫn (301/302 Redirects) tốt cho SEO</p>
-                </div>
+            <PageHeader
+                title="Redirect Links"
+                description="Quản lý chuyển hướng đường dẫn (301/302 Redirects) tốt cho SEO"
+            >
+                <SearchInput
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    placeholder="Tìm kiếm link..."
+                    className="w-64"
+                />
+                <button
+                    onClick={() => openEditModal()}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-bold transition-all"
+                >
+                    <Plus size={18} />
+                    Thêm mới
+                </button>
+            </PageHeader>
 
-                <div className="flex items-center gap-4">
-                    <div className="relative w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Tìm kiếm link..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-zinc-300 focus:outline-none focus:border-indigo-500"
-                        />
-                    </div>
-                    <button
-                        onClick={() => openEditModal()}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-bold transition-all"
-                    >
-                        <Plus size={18} />
-                        Thêm mới
-                    </button>
-                </div>
-            </div>
-
-            <div className="bg-[#111114] border border-white/10 rounded-2xl overflow-hidden">
-                <table className="w-full">
-                    <thead>
-                        <tr className="border-b border-white/5 text-left bg-white/[0.02]">
-                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase">Đường dẫn cũ (From)</th>
-                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase w-8"></th>
-                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase">Đường dẫn mới (To)</th>
-                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase w-24">Loại</th>
-                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase w-24 text-center">Hits</th>
-                            <th className="p-4 text-xs font-bold text-zinc-500 uppercase w-32 text-right">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                        {loading ? (
-                            <tr><td colSpan={6} className="p-8 text-center text-zinc-500">Đang tải...</td></tr>
-                        ) : filteredRedirects.length === 0 ? (
-                            <tr><td colSpan={6} className="p-8 text-center text-zinc-500">Chưa có liên kết chuyển hướng nào.</td></tr>
-                        ) : (
-                            filteredRedirects.map((redirect) => (
-                                <tr key={redirect.id} className="hover:bg-white/[0.02] transition-colors">
-                                    <td className="p-4 font-mono text-sm text-zinc-300">{redirect.fromPath}</td>
-                                    <td className="p-4 text-zinc-600"><ArrowRight size={16} /></td>
-                                    <td className="p-4 font-mono text-sm text-indigo-400">{redirect.toPath}</td>
-                                    <td className="p-4 text-xs bg-white/5 mx-4 inline-block my-2 rounded text-zinc-400 font-bold">{redirect.type}</td>
-                                    <td className="p-4 text-sm text-zinc-500 text-center">{redirect.hits}</td>
-                                    <td className="p-4 text-right space-x-2">
-                                        <button onClick={() => openEditModal(redirect)} className="p-2 text-zinc-500 hover:text-indigo-400 transition-colors"><Edit2 size={16} /></button>
-                                        <button onClick={() => setDeleteConfirm({ show: true, id: redirect.id })} className="p-2 text-zinc-500 hover:text-red-400 transition-colors"><Trash2 size={16} /></button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
-            </div>
+            <TableContainer>
+                <TableHeader>
+                    <TableHead>Đường dẫn cũ (From)</TableHead>
+                    <TableHead className="w-8"></TableHead>
+                    <TableHead>Đường dẫn mới (To)</TableHead>
+                    <TableHead className="w-24">Loại</TableHead>
+                    <TableHead align="center" className="w-24">Hits</TableHead>
+                    <TableHead align="right" className="w-32">Thao tác</TableHead>
+                </TableHeader>
+                <TableBody loading={loading} isEmpty={filteredRedirects.length === 0} emptyMessage="Chưa có liên kết chuyển hướng nào." colSpan={6}>
+                    {filteredRedirects.map((redirect) => (
+                        <TableRow key={redirect.id}>
+                            <TableCell>
+                                <code className="font-mono text-sm text-zinc-300">{redirect.fromPath}</code>
+                            </TableCell>
+                            <TableCell>
+                                <ArrowRight size={16} className="text-zinc-600" />
+                            </TableCell>
+                            <TableCell>
+                                <code className="font-mono text-sm text-indigo-400">{redirect.toPath}</code>
+                            </TableCell>
+                            <TableCell>
+                                <span className="text-xs bg-white/5 px-2 py-1 rounded text-zinc-400 font-bold">{redirect.type}</span>
+                            </TableCell>
+                            <TableCell align="center">
+                                <span className="text-sm text-zinc-500">{redirect.hits}</span>
+                            </TableCell>
+                            <TableCell align="right">
+                                <div className="flex items-center justify-end gap-2">
+                                    <button onClick={() => openEditModal(redirect)} className="p-2 text-zinc-500 hover:text-indigo-400 transition-colors">
+                                        <Edit2 size={16} />
+                                    </button>
+                                    <button onClick={() => setDeleteConfirm({ show: true, id: redirect.id })} className="p-2 text-zinc-500 hover:text-red-400 transition-colors">
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </TableContainer>
 
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 animate-fade-in">

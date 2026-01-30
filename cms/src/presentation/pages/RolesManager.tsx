@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRoleStore } from '../../store/role.store';
 import ConfirmModal from '../components/ConfirmModal';
+import PageHeader from '../components/PageHeader';
 
 const PERMISSIONS_LIST = [
     {
@@ -176,11 +177,10 @@ const RolesManager = () => {
 
     return (
         <div className="space-y-6 pb-20 font-inter">
-            <div className="flex justify-between items-end">
-                <div>
-                    <h1 className="text-3xl font-bold text-zinc-100 mb-2 font-outfit uppercase tracking-tight">Quản lý Phân quyền</h1>
-                    <p className="text-zinc-500 text-sm">Tạo và quản lý các vai trò, quyền hạn truy cập hệ thống.</p>
-                </div>
+            <PageHeader
+                title="Quản lý Phân quyền"
+                description="Tạo và quản lý các vai trò, quyền hạn truy cập hệ thống."
+            >
                 <button
                     onClick={() => handleOpenModal()}
                     className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/20 active:scale-95 text-sm"
@@ -188,7 +188,7 @@ const RolesManager = () => {
                     <Plus size={18} />
                     <span>Thêm vai trò</span>
                 </button>
-            </div>
+            </PageHeader>
 
             {/* Roles List */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

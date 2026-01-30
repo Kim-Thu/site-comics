@@ -20,14 +20,34 @@ export interface IComicService {
   createComic(data: any): Promise<Comic>;
   updateComic(id: string, data: any): Promise<Comic>;
   deleteComic(id: string): Promise<void>;
-  uploadImage(file: File): Promise<{ url: string }>;
+}
+
+export interface IChapterService {
   getChapters(comicId: string): Promise<any[]>;
   createChapter(data: any): Promise<any>;
   updateChapter(id: string, data: any): Promise<any>;
   deleteChapter(id: string): Promise<void>;
-  getTags(): Promise<any[]>;
+}
+
+export interface ICategoryService {
+  getCategories(): Promise<any[]>;
   createCategory(data: any): Promise<any>;
+  updateCategory(id: string, data: any): Promise<any>;
+  deleteCategory(id: string): Promise<void>;
+}
+
+export interface ITagService {
+  getTags(): Promise<any[]>;
   createTag(data: any): Promise<any>;
+  updateTag(id: string, data: any): Promise<any>;
+  deleteTag(id: string): Promise<void>;
+}
+
+export interface IMediaService {
+  uploadImage(file: File): Promise<{ url: string }>;
+  getMedia(params?: any): Promise<{ data: any[], meta: any }>;
+  deleteMedia(id: string): Promise<void>;
+  updateMedia(id: string, data: any): Promise<any>;
 }
 
 export interface ISettingService {

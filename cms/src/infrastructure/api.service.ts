@@ -1,13 +1,13 @@
 import axios from 'axios';
-import { Comic, IComicService, ISettingService } from '../core/interfaces';
+import { Comic, ICategoryService, IChapterService, IComicService, IMediaService, ISettingService, ITagService } from '../core/interfaces';
 
-const API_URL = 'http://localhost:3001'; // Default backend URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 // Security: Use axios interceptor for JWT
 import { useAuthStore } from '../store/auth.store';
 
 export const api = axios.create({
-  baseURL: 'http://localhost:3001',
+  baseURL: API_URL,
 });
 
 api.interceptors.request.use((config) => {
@@ -52,23 +52,9 @@ export class ComicService implements IComicService {
   async deleteComic(id: string): Promise<void> {
     await api.delete(`/comics/${id}`);
   }
+}
 
-  async getCategories(): Promise<any[]> {
-    const res = await api.get('/categories');
-    return res.data;
-  }
-
-  async uploadImage(file: File): Promise<{ url: string }> {
-    const formData = new FormData();
-    formData.append('file', file);
-    const res = await api.post('/upload/image', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return res.data;
-  }
-
+export class ChapterService implements IChapterService {
   async getChapters(comicId: string): Promise<any[]> {
     const res = await api.get(`/chapters/comic/${comicId}`);
     return res.data;
@@ -87,19 +73,16 @@ export class ComicService implements IComicService {
   async deleteChapter(id: string): Promise<void> {
     await api.delete(`/chapters/${id}`);
   }
+}
 
-  async getTags(): Promise<any[]> {
-    const res = await api.get('/tags');
+export class CategoryService implements ICategoryService {
+  async getCategories(): Promise<any[]> {
+    const res = await api.get('/categories');
     return res.data;
   }
 
   async createCategory(data: any): Promise<any> {
     const res = await api.post('/categories', data);
-    return res.data;
-  }
-
-  async createTag(data: any): Promise<any> {
-    const res = await api.post('/tags', data);
     return res.data;
   }
 
@@ -111,6 +94,18 @@ export class ComicService implements IComicService {
   async deleteCategory(id: string): Promise<void> {
     await api.delete(`/categories/${id}`);
   }
+}
+
+export class TagService implements ITagService {
+  async getTags(): Promise<any[]> {
+    const res = await api.get('/tags');
+    return res.data;
+  }
+
+  async createTag(data: any): Promise<any> {
+    const res = await api.post('/tags', data);
+    return res.data;
+  }
 
   async updateTag(id: string, data: any): Promise<any> {
     const res = await api.patch(`/tags/${id}`, data);
@@ -119,6 +114,33 @@ export class ComicService implements IComicService {
 
   async deleteTag(id: string): Promise<void> {
     await api.delete(`/tags/${id}`);
+  }
+}
+
+export class MediaService implements IMediaService {
+  async uploadImage(file: File): Promise<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await api.post('/media/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  }
+
+  async getMedia(params?: any): Promise<{ data: any[], meta: any }> {
+    const res = await api.get('/media', { params });
+    return res.data;
+  }
+
+  async deleteMedia(id: string): Promise<void> {
+    await api.delete(`/media/${id}`);
+  }
+
+  async updateMedia(id: string, data: any): Promise<any> {
+    const res = await api.patch(`/media/${id}`, data);
+    return res.data;
   }
 }
 
@@ -145,7 +167,12 @@ export class SettingService implements ISettingService {
 }
 
 // Dependency Injection Registry
+// Dependency Injection Registry
 export const comicService = new ComicService();
+export const chapterService = new ChapterService();
+export const categoryService = new CategoryService();
+export const tagService = new TagService();
+export const mediaService = new MediaService();
 export const settingService = new SettingService();
 
 export class UserService {

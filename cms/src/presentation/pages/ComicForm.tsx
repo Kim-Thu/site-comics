@@ -2,7 +2,7 @@ import { ArrowLeft, Image as ImageIcon, Loader2, Plus, Save, Search, X } from 'l
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
-import { comicService } from '../../infrastructure/api.service';
+import { categoryService, comicService, mediaService, tagService } from '../../infrastructure/api.service';
 import { AuthState, useAuthStore } from '../../store/auth.store';
 import CustomSelect from '../components/CustomSelect';
 import QuillEditor from '../components/QuillEditor';
@@ -54,8 +54,8 @@ const ComicForm = () => {
     const fetchInitialData = async () => {
         try {
             const [cats, tgs] = await Promise.all([
-                comicService.getCategories(),
-                comicService.getTags()
+                categoryService.getCategories(),
+                tagService.getTags()
             ]);
             setCategories(cats);
             setTags(tgs);
@@ -94,7 +94,7 @@ const ComicForm = () => {
 
         setUploading(true);
         try {
-            const res = await comicService.uploadImage(file);
+            const res = await mediaService.uploadImage(file);
             setFormData(prev => ({ ...prev, thumbnail: res.url }));
             toast.success('Tải ảnh lên thành công');
         } catch (error) {
@@ -110,7 +110,7 @@ const ComicForm = () => {
         setCreatingItem(true);
         try {
             const slug = newItemName.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-            const res = await comicService.createCategory({ name: newItemName, slug });
+            const res = await categoryService.createCategory({ name: newItemName, slug });
             setCategories([...categories, res]);
             setFormData(prev => ({ ...prev, categoryIds: [...prev.categoryIds, res.id] }));
             toast.success('Đã thêm thể loại mới');
@@ -129,7 +129,7 @@ const ComicForm = () => {
         setCreatingItem(true);
         try {
             const slug = newItemName.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
-            const res = await comicService.createTag({ name: newItemName, slug });
+            const res = await tagService.createTag({ name: newItemName, slug });
             setTags([...tags, res]);
             setFormData(prev => ({ ...prev, tagIds: [...prev.tagIds, res.id] }));
             toast.success('Đã thêm tag mới');

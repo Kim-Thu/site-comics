@@ -1,10 +1,13 @@
-import { Check, Edit2, ExternalLink, FileText, Plus, Search, Trash2 } from 'lucide-react';
+import { Check, Edit2, ExternalLink, FileText, Plus, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../infrastructure/api.service';
 import Accordion from '../components/Accordion';
 import ConfirmModal from '../components/ConfirmModal';
+import PageHeader from '../components/PageHeader';
+import SearchInput from '../components/SearchInput';
+import { TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../components/Table';
 
 interface Page {
     id: string;
@@ -119,51 +122,35 @@ const PagesManager = () => {
 
     return (
         <div className="space-y-6 animate-fade-in font-inter">
-            {/* Header */}
-            <div className="flex justify-between items-center bg-[#111114] p-4 rounded-2xl border border-white/10">
-                <div>
-                    <h1 className="text-2xl font-bold text-zinc-100 font-outfit uppercase">Quản lý Trang</h1>
-                    <p className="text-zinc-500 text-xs">
-                        Tạo và quản lý các trang tĩnh trên website (Giới thiệu, Liên hệ, Chính sách...)
-                        {selectedIds.size > 0 && (
-                            <span className="ml-2 text-indigo-400 font-bold">
-                                • {selectedIds.size} đã chọn
-                            </span>
-                        )}
-                    </p>
-                </div>
-
-                <div className="flex items-center gap-4">
-                    {selectedIds.size > 0 && (
-                        <button
-                            onClick={handleBulkDelete}
-                            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-sm font-bold transition-colors"
-                        >
-                            <Trash2 size={16} />
-                            Xóa {selectedIds.size} trang
-                        </button>
-                    )}
-
-                    <div className="relative w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={16} />
-                        <input
-                            type="text"
-                            placeholder="Tìm kiếm trang..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-zinc-300 focus:outline-none focus:border-indigo-500"
-                        />
-                    </div>
-
+            <PageHeader
+                title="Quản lý Trang"
+                description={`Tạo và quản lý các trang tĩnh trên website (Giới thiệu, Liên hệ, Chính sách...)${selectedIds.size > 0 ? ` • ${selectedIds.size} đã chọn` : ''}`}
+            >
+                {selectedIds.size > 0 && (
                     <button
-                        onClick={() => navigate('/pages/create')}
-                        className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
+                        onClick={handleBulkDelete}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-sm font-bold transition-colors"
                     >
-                        <Plus size={18} />
-                        Thêm trang mới
+                        <Trash2 size={16} />
+                        Xóa {selectedIds.size} trang
                     </button>
-                </div>
-            </div>
+                )}
+
+                <SearchInput
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    placeholder="Tìm kiếm trang..."
+                    className="w-64"
+                />
+
+                <button
+                    onClick={() => navigate('/pages/create')}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all"
+                >
+                    <Plus size={18} />
+                    Thêm trang mới
+                </button>
+            </PageHeader>
 
             {/* Content */}
             <div className="space-y-4">
@@ -182,8 +169,8 @@ const PagesManager = () => {
                                 className="text-sm text-zinc-400 hover:text-white transition-colors flex items-center gap-2"
                             >
                                 <div className={`w-4 h-4 rounded border-2 flex items-center justify-center transition-colors ${selectedIds.size === pages.length
-                                        ? 'bg-indigo-500 border-indigo-500'
-                                        : 'border-white/20'
+                                    ? 'bg-indigo-500 border-indigo-500'
+                                    : 'border-white/20'
                                     }`}>
                                     {selectedIds.size === pages.length && <Check size={12} className="text-white" />}
                                 </div>
@@ -198,81 +185,78 @@ const PagesManager = () => {
                                 count={groupPages.length}
                                 defaultOpen={true}
                             >
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead>
-                                            <tr className="border-b border-white/5 text-left">
-                                                <th className="p-3 text-xs font-bold text-zinc-500 uppercase w-12"></th>
-                                                <th className="p-3 text-xs font-bold text-zinc-500 uppercase">Tiêu đề</th>
-                                                <th className="p-3 text-xs font-bold text-zinc-500 uppercase">Slug</th>
-                                                <th className="p-3 text-xs font-bold text-zinc-500 uppercase">Lượt xem</th>
-                                                <th className="p-3 text-xs font-bold text-zinc-500 uppercase">Ngày tạo</th>
-                                                <th className="p-3 text-xs font-bold text-zinc-500 uppercase text-right">Thao tác</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {groupPages.map((page, index) => {
-                                                const isSelected = selectedIds.has(page.id);
-                                                return (
-                                                    <tr
-                                                        key={page.id}
-                                                        onClick={(e) => handleRowClick(page, index, e)}
-                                                        className={`
-                                                            border-b border-white/5 transition-all cursor-pointer
-                                                            ${isSelected
-                                                                ? 'bg-indigo-500/10 border-indigo-500/30'
-                                                                : 'hover:bg-white/[0.02]'
-                                                            }
-                                                        `}
-                                                    >
-                                                        <td className="p-3">
-                                                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isSelected
-                                                                    ? 'bg-indigo-500 border-indigo-500'
-                                                                    : 'border-white/20'
-                                                                }`}>
-                                                                {isSelected && <Check size={14} className="text-white" />}
-                                                            </div>
-                                                        </td>
-                                                        <td className="p-3">
-                                                            <span className="font-bold text-zinc-200 text-sm">{page.title}</span>
-                                                        </td>
-                                                        <td className="p-3 text-sm text-zinc-400">
-                                                            <code>/{page.slug}</code>
-                                                        </td>
-                                                        <td className="p-3 text-sm text-zinc-400">{page.views || 0}</td>
-                                                        <td className="p-3 text-sm text-zinc-400">
+                                <TableContainer className="rounded-none shadow-none border-0">
+                                    <TableHeader>
+                                        <TableHead className="w-12"></TableHead>
+                                        <TableHead>Tiêu đề</TableHead>
+                                        <TableHead>Slug</TableHead>
+                                        <TableHead>Lượt xem</TableHead>
+                                        <TableHead>Ngày tạo</TableHead>
+                                        <TableHead align="right">Thao tác</TableHead>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {groupPages.map((page, index) => {
+                                            const isSelected = selectedIds.has(page.id);
+                                            return (
+                                                <TableRow
+                                                    key={page.id}
+                                                    onClick={(e) => handleRowClick(page, index, e)}
+                                                    className={`cursor-pointer ${isSelected
+                                                            ? 'bg-indigo-500/10 border-indigo-500/30'
+                                                            : ''
+                                                        }`}
+                                                >
+                                                    <TableCell>
+                                                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isSelected
+                                                            ? 'bg-indigo-500 border-indigo-500'
+                                                            : 'border-white/20'
+                                                            }`}>
+                                                            {isSelected && <Check size={14} className="text-white" />}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <span className="font-bold text-zinc-200 text-sm">{page.title}</span>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <code className="text-sm text-zinc-400">/{page.slug}</code>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <span className="text-sm text-zinc-400">{page.views || 0}</span>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <span className="text-sm text-zinc-400">
                                                             {new Date(page.createdAt).toLocaleDateString()}
-                                                        </td>
-                                                        <td className="p-3">
-                                                            <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                                                                <button
-                                                                    onClick={() => navigate(`/pages/edit/${page.id}`)}
-                                                                    className="p-2.5 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-400/10 rounded-xl transition-all"
-                                                                >
-                                                                    <Edit2 size={18} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => setDeleteConfirm({ show: true, id: page.id, title: page.title })}
-                                                                    className="p-2.5 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
-                                                                >
-                                                                    <Trash2 size={18} />
-                                                                </button>
-                                                                <a
-                                                                    href={`http://localhost:3000/page/${page.slug}`}
-                                                                    target="_blank"
-                                                                    rel="noreferrer"
-                                                                    className="p-2.5 text-zinc-500 hover:text-white hover:bg-white/10 rounded-xl transition-all"
-                                                                >
-                                                                    <ExternalLink size={18} />
-                                                                </a>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                        </span>
+                                                    </TableCell>
+                                                    <TableCell align="right">
+                                                        <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                                                            <button
+                                                                onClick={() => navigate(`/pages/edit/${page.id}`)}
+                                                                className="p-2.5 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-400/10 rounded-xl transition-all"
+                                                            >
+                                                                <Edit2 size={18} />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setDeleteConfirm({ show: true, id: page.id, title: page.title })}
+                                                                className="p-2.5 text-zinc-500 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
+                                                            >
+                                                                <Trash2 size={18} />
+                                                            </button>
+                                                            <a
+                                                                href={`http://localhost:3000/page/${page.slug}`}
+                                                                target="_blank"
+                                                                rel="noreferrer"
+                                                                className="p-2.5 text-zinc-500 hover:text-white hover:bg-white/10 rounded-xl transition-all"
+                                                            >
+                                                                <ExternalLink size={18} />
+                                                            </a>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+                                </TableContainer>
                             </Accordion>
                         ))}
                     </>

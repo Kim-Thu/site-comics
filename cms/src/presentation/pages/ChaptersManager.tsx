@@ -2,8 +2,10 @@ import { ArrowLeft, Edit2, Plus, Trash2, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
-import { comicService } from '../../infrastructure/api.service';
+import { chapterService, comicService } from '../../infrastructure/api.service';
 import ConfirmModal from '../components/ConfirmModal';
+import PageHeader from '../components/PageHeader';
+import { TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../components/Table';
 
 const ChaptersManager = () => {
     const { id } = useParams(); // Comic ID
@@ -34,7 +36,7 @@ const ChaptersManager = () => {
             const comicData = await comicService.getComicById(id!);
             setComic(comicData);
 
-            const chaptersData = await comicService.getChapters(id!);
+            const chaptersData = await chapterService.getChapters(id!);
             setChapters(chaptersData);
         } catch (error) {
             console.error('Failed to fetch data');
@@ -68,7 +70,7 @@ const ChaptersManager = () => {
 
     const handleDelete = async () => {
         try {
-            await comicService.deleteChapter(deleteConfirm.id);
+            await chapterService.deleteChapter(deleteConfirm.id);
             toast.success('Xóa chương thành công');
             fetchData();
         } catch (error) {
@@ -80,10 +82,10 @@ const ChaptersManager = () => {
         e.preventDefault();
         try {
             if (selectedChapter) {
-                await comicService.updateChapter(selectedChapter.id, formData);
+                await chapterService.updateChapter(selectedChapter.id, formData);
                 toast.success('Cập nhật chương thành công');
             } else {
-                await comicService.createChapter({ ...formData, comicId: id });
+                await chapterService.createChapter({ ...formData, comicId: id });
                 toast.success('Thêm chương mới thành công');
             }
             setIsModalOpen(false);
@@ -101,21 +103,24 @@ const ChaptersManager = () => {
 
     return (
         <div className="space-y-10 animate-fade-in font-inter">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={() => navigate('/comics')}
-                        className="p-2 hover:bg-white/5 rounded-xl text-zinc-400 hover:text-white transition-all bg-transparent border-none"
-                    >
-                        <ArrowLeft size={20} />
-                    </button>
-                    <div>
-                        <h1 className="text-2xl font-bold text-white font-outfit truncate max-w-[400px]">
-                            CHƯƠNG: <span className="text-indigo-400 uppercase">{comic?.title}</span>
-                        </h1>
-                        <p className="text-zinc-500 text-sm">Quản lý dạnh sách các chương truyện</p>
+            <PageHeader
+                title={
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => navigate('/comics')}
+                            className="p-2 hover:bg-white/5 rounded-xl text-zinc-400 hover:text-white transition-all bg-transparent border-none"
+                        >
+                            <ArrowLeft size={20} />
+                        </button>
+                        <div className="flex flex-col">
+                            <div className="text-2xl font-bold text-white font-outfit truncate max-w-[400px]">
+                                CHƯƠNG: <span className="text-indigo-400 uppercase">{comic?.title}</span>
+                            </div>
+                            <p className="text-zinc-500 text-sm font-medium mt-1">Quản lý danh sách các chương truyện</p>
+                        </div>
                     </div>
-                </div>
+                }
+            >
                 <button
                     onClick={handleAdd}
                     className="inline-flex items-center justify-center px-6 py-2.5 rounded-xl font-bold bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 transition-all active:scale-95 gap-2 text-sm"
@@ -123,56 +128,52 @@ const ChaptersManager = () => {
                     <Plus size={18} />
                     Thêm chương mới
                 </button>
-            </div>
+            </PageHeader>
 
             <div className="bg-[#111114] border border-white/[0.08] rounded-2xl p-0 bg-white/[0.02] backdrop-blur-xl overflow-hidden shadow-2xl">
-                <table className="w-full text-left border-collapse">
-                    <thead className="bg-white/[0.03] border-b border-white/5">
-                        <tr>
-                            <th className="px-6 py-5 text-xs font-black text-zinc-500 uppercase tracking-widest">STT</th>
-                            <th className="px-6 py-5 text-xs font-black text-zinc-500 uppercase tracking-widest">Tên chương</th>
-                            <th className="px-6 py-5 text-xs font-black text-zinc-500 uppercase tracking-widest">Slug</th>
-                            <th className="px-6 py-5 text-xs font-black text-zinc-500 uppercase tracking-widest">Ngày cập nhật</th>
-                            <th className="px-6 py-5 text-xs font-black text-zinc-500 uppercase tracking-widest text-right">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                        {chapters.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} className="px-6 py-12 text-center text-zinc-600 font-bold uppercase text-xs">
-                                    Chưa có chương nào được cập nhật.
-                                </td>
-                            </tr>
-                        ) : (
-                            chapters.sort((a, b) => b.number - a.number).map((ch) => (
-                                <tr key={ch.id} className="hover:bg-white/[0.01] transition-colors group">
-                                    <td className="px-6 py-5 font-mono text-indigo-400 font-bold">{ch.number}</td>
-                                    <td className="px-6 py-5">
-                                        <div className="text-sm font-bold text-zinc-200 group-hover:text-white transition-colors">{ch.title || `Chương ${ch.number}`}</div>
-                                    </td>
-                                    <td className="px-6 py-5 text-xs text-zinc-500 font-mono italic">{ch.slug}</td>
-                                    <td className="px-6 py-5 text-xs text-zinc-600">{new Date(ch.updatedAt).toLocaleDateString()}</td>
-                                    <td className="px-6 py-5 text-right">
-                                        <div className="flex items-center justify-end gap-2">
-                                            <button
-                                                onClick={() => handleEdit(ch)}
-                                                className="p-2 text-zinc-500 hover:text-indigo-400 hover:bg-white/5 rounded-lg transition-all bg-transparent border-none"
-                                            >
-                                                <Edit2 size={16} />
-                                            </button>
-                                            <button
-                                                onClick={() => setDeleteConfirm({ show: true, id: ch.id })}
-                                                className="p-2 text-zinc-500 hover:text-red-400 hover:bg-white/5 rounded-lg transition-all bg-transparent border-none"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                <TableContainer>
+                    <TableHeader>
+                        <TableHead>STT</TableHead>
+                        <TableHead>Tên chương</TableHead>
+                        <TableHead>Slug</TableHead>
+                        <TableHead>Ngày cập nhật</TableHead>
+                        <TableHead align="right">Thao tác</TableHead>
+                    </TableHeader>
+                    <TableBody isEmpty={chapters.length === 0} emptyMessage="Chưa có chương nào được cập nhật." colSpan={5}>
+                        {chapters.sort((a, b) => b.number - a.number).map((ch) => (
+                            <TableRow key={ch.id} className="group">
+                                <TableCell>
+                                    <div className="font-mono text-indigo-400 font-bold">{ch.number}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="text-sm font-bold text-zinc-200 group-hover:text-white transition-colors">{ch.title || `Chương ${ch.number}`}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="text-xs text-zinc-500 font-mono italic">{ch.slug}</div>
+                                </TableCell>
+                                <TableCell>
+                                    <div className="text-xs text-zinc-600">{new Date(ch.updatedAt).toLocaleDateString()}</div>
+                                </TableCell>
+                                <TableCell align="right">
+                                    <div className="flex items-center justify-end gap-2">
+                                        <button
+                                            onClick={() => handleEdit(ch)}
+                                            className="p-2 text-zinc-500 hover:text-indigo-400 hover:bg-white/5 rounded-lg transition-all bg-transparent border-none"
+                                        >
+                                            <Edit2 size={16} />
+                                        </button>
+                                        <button
+                                            onClick={() => setDeleteConfirm({ show: true, id: ch.id })}
+                                            className="p-2 text-zinc-500 hover:text-red-400 hover:bg-white/5 rounded-lg transition-all bg-transparent border-none"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </TableContainer>
             </div>
 
             {/* Chapter Modal */}

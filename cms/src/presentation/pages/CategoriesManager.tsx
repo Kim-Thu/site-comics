@@ -1,10 +1,13 @@
-import { Check, Edit2, Loader2, Plus, Search, Trash2 } from 'lucide-react';
+import { Check, Edit2, Loader2, Plus, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { comicService } from '../../infrastructure/api.service';
+import { categoryService } from '../../infrastructure/api.service';
 import Accordion from '../components/Accordion';
 import ConfirmModal from '../components/ConfirmModal';
 import CustomSelect from '../components/CustomSelect';
+import PageHeader from '../components/PageHeader';
+import SearchInput from '../components/SearchInput';
+import { TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../components/Table';
 
 const CategoriesManager = () => {
     const [categories, setCategories] = useState<any[]>([]);
@@ -35,7 +38,7 @@ const CategoriesManager = () => {
 
     const fetchCategories = async () => {
         try {
-            const data = await comicService.getCategories();
+            const data = await categoryService.getCategories();
             setCategories(data);
         } catch (error) {
             toast.error('Failed to load categories');
@@ -49,10 +52,10 @@ const CategoriesManager = () => {
         setSaving(true);
         try {
             if (editingId) {
-                await comicService.updateCategory(editingId, formData);
+                await categoryService.updateCategory(editingId, formData);
                 toast.success('Category updated successfully');
             } else {
-                await comicService.createCategory(formData);
+                await categoryService.createCategory(formData);
                 toast.success('Category created successfully');
             }
             setShowModal(false);
@@ -68,12 +71,12 @@ const CategoriesManager = () => {
     const handleDelete = async () => {
         try {
             if (deleteConfirm.ids && deleteConfirm.ids.length > 0) {
-                await Promise.all(deleteConfirm.ids.map(id => comicService.deleteCategory(id)));
+                await Promise.all(deleteConfirm.ids.map(id => categoryService.deleteCategory(id)));
                 setCategories(categories.filter(c => !deleteConfirm.ids!.includes(c.id)));
                 setSelectedIds(new Set());
                 toast.success(`Deleted ${deleteConfirm.ids.length} categories`);
             } else {
-                await comicService.deleteCategory(deleteConfirm.id);
+                await categoryService.deleteCategory(deleteConfirm.id);
                 toast.success('Category deleted');
                 fetchCategories();
             }
@@ -145,54 +148,37 @@ const CategoriesManager = () => {
     return (
         <div className="space-y-8 animate-fade-in font-inter">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-black text-white font-outfit uppercase tracking-tight">
-                        Quản lý Thể loại
-                    </h1>
-                    <p className="text-zinc-400 text-xs font-medium mt-1">
-                        Phân loại truyện tranh theo nhóm và chủ đề
-                        {selectedIds.size > 0 && (
-                            <span className="ml-2 text-indigo-400 font-bold">
-                                • {selectedIds.size} đã chọn
-                            </span>
-                        )}
-                    </p>
-                </div>
-                <div className="flex gap-2">
-                    {selectedIds.size > 0 && (
-                        <button
-                            onClick={handleBulkDelete}
-                            className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-sm font-bold transition-colors"
-                        >
-                            <Trash2 size={16} />
-                            Xóa {selectedIds.size}
-                        </button>
-                    )}
+            <PageHeader
+                title="Quản lý Thể loại"
+                description="Phân loại truyện tranh theo nhóm và chủ đề"
+            >
+                {selectedIds.size > 0 && (
                     <button
-                        onClick={() => { resetForm(); setShowModal(true); }}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all text-sm"
+                        onClick={handleBulkDelete}
+                        className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-xl text-sm font-bold transition-colors"
                     >
-                        <Plus size={18} />
-                        <span>Thêm thể loại</span>
+                        <Trash2 size={16} />
+                        Xóa {selectedIds.size}
                     </button>
-                </div>
-            </div>
+                )}
+                <button
+                    onClick={() => { resetForm(); setShowModal(true); }}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-500/20 active:scale-95 transition-all text-sm"
+                >
+                    <Plus size={18} />
+                    <span>Thêm thể loại</span>
+                </button>
+            </PageHeader>
 
             {/* Content */}
             <div className="bg-[#111114] border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl">
                 {/* Toolbar */}
                 <div className="p-4 border-b border-white/5 flex gap-4">
-                    <div className="relative flex-1 max-w-md group">
-                        <input
-                            type="text"
-                            placeholder="Tìm kiếm thể loại..."
-                            className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-zinc-200 focus:outline-none focus:border-indigo-500/50 transition-all text-sm"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-500 transition-colors" />
-                    </div>
+                    <SearchInput
+                        value={searchTerm}
+                        onChange={setSearchTerm}
+                        placeholder="Tìm kiếm thể loại..."
+                    />
                     <button
                         onClick={selectAll}
                         className="text-sm text-zinc-400 hover:text-white transition-colors flex items-center gap-2 px-3"
@@ -216,43 +202,40 @@ const CategoriesManager = () => {
                         </div>
                     ) : (
                         <Accordion title="Thể loại gốc" count={rootCategories.length} defaultOpen={true}>
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="border-b border-white/5 bg-white/[0.02]">
-                                        <th className="p-4 text-xs font-bold text-zinc-500 uppercase w-12"></th>
-                                        <th className="p-4 text-xs font-bold text-zinc-500 uppercase w-1/3">Tên thể loại</th>
-                                        <th className="p-4 text-xs font-bold text-zinc-500 uppercase w-1/3">Slug</th>
-                                        <th className="p-4 text-xs font-bold text-zinc-500 uppercase text-right">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/5">
+                            <TableContainer className="rounded-none shadow-none border-0">
+                                <TableHeader>
+                                    <TableHead className="w-12"></TableHead>
+                                    <TableHead className="w-1/3">Tên thể loại</TableHead>
+                                    <TableHead className="w-1/3">Slug</TableHead>
+                                    <TableHead align="right">Thao tác</TableHead>
+                                </TableHeader>
+                                <TableBody>
                                     {rootCategories.map((cat, index) => {
                                         const isSelected = selectedIds.has(cat.id);
                                         return (
-                                            <tr
+                                            <TableRow
                                                 key={cat.id}
                                                 onClick={(e) => handleRowClick(cat, index, e)}
-                                                className={`transition-colors cursor-pointer ${isSelected ? 'bg-indigo-500/10' : 'hover:bg-white/[0.02]'
-                                                    }`}
+                                                className={isSelected ? 'bg-indigo-500/10' : ''}
                                             >
-                                                <td className="p-4">
+                                                <TableCell>
                                                     <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-indigo-500 border-indigo-500' : 'border-white/20'
                                                         }`}>
                                                         {isSelected && <Check size={14} className="text-white" />}
                                                     </div>
-                                                </td>
-                                                <td className="p-4">
+                                                </TableCell>
+                                                <TableCell>
                                                     <div className="font-bold text-zinc-200 text-sm">
                                                         {cat.name}
                                                     </div>
-                                                </td>
-                                                <td className="p-4">
+                                                </TableCell>
+                                                <TableCell>
                                                     <code className="text-xs font-mono text-zinc-500 bg-white/5 px-1.5 py-0.5 rounded border border-white/5">
                                                         {cat.slug}
                                                     </code>
-                                                </td>
-                                                <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
-                                                    <div className="flex items-center justify-end gap-2">
+                                                </TableCell>
+                                                <TableCell align="right">
+                                                    <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                                                         <button
                                                             onClick={() => openEditModal(cat)}
                                                             className="p-2 hover:bg-indigo-500/10 text-zinc-400 hover:text-indigo-400 rounded-lg transition-all"
@@ -266,12 +249,12 @@ const CategoriesManager = () => {
                                                             <Trash2 size={16} />
                                                         </button>
                                                     </div>
-                                                </td>
-                                            </tr>
+                                                </TableCell>
+                                            </TableRow>
                                         );
                                     })}
-                                </tbody>
-                            </table>
+                                </TableBody>
+                            </TableContainer>
                         </Accordion>
                     )}
                 </div>

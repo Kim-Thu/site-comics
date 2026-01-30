@@ -6,6 +6,10 @@ import { userService } from '../../infrastructure/api.service';
 import { useRoleStore } from '../../store/role.store';
 import ConfirmModal from '../components/ConfirmModal';
 import CustomSelect from '../components/CustomSelect';
+import PageHeader from '../components/PageHeader';
+import SearchInput from '../components/SearchInput';
+import StatusBadge from '../components/StatusBadge';
+import { TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../components/Table';
 
 interface ActivityLog {
     id: string;
@@ -160,166 +164,145 @@ const UsersManager = () => {
 
     return (
         <div className="space-y-6 pb-20 font-inter">
-            <div className="flex flex-col md:flex-row justify-between items-end gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold text-zinc-100 mb-2 font-outfit uppercase tracking-tight">Thành Viên</h1>
-                    <p className="text-zinc-500 text-sm">Quản lý người dùng và trạng thái hoạt động.</p>
-                </div>
+            <PageHeader
+                title="Thành Viên"
+                description="Quản lý người dùng và trạng thái hoạt động."
+            />
 
-                <div className="flex flex-wrap gap-3">
-                    {/* Role Filter */}
-                    <div className="flex bg-[#111114] p-1 rounded-xl border border-white/10 h-10 items-center">
+            <div className="bg-[#111114] border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl">
+                {/* Toolbar */}
+                <div className="p-4 border-b border-white/5 flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <SearchInput
+                        value={search}
+                        onChange={setSearch}
+                        placeholder="Tìm kiếm theo tên hoặc email..."
+                        className="w-full md:w-80"
+                    />
+
+                    <div className="flex flex-wrap gap-3 items-center">
+                        {/* Role Filter */}
+                        <div className="flex bg-[#111114] p-1 rounded-xl border border-white/10 h-10 items-center">
+                            <button
+                                onClick={() => setFilterType('ALL')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterType === 'ALL' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            >
+                                Tất cả
+                            </button>
+                            <button
+                                onClick={() => setFilterType('STAFF')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterType === 'STAFF' ? 'bg-indigo-500 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            >
+                                Nhân sự
+                            </button>
+                            <button
+                                onClick={() => setFilterType('USER')}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterType === 'USER' ? 'bg-emerald-500 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            >
+                                Độc giả
+                            </button>
+                        </div>
+
+                        {/* Status Filter */}
+                        <CustomSelect
+                            value={statusFilter}
+                            onChange={(val) => setStatusFilter(val as any)}
+                            options={[
+                                { value: 'ALL', label: 'Mọi trạng thái' },
+                                { value: 'ACTIVE', label: 'Đang hoạt động' },
+                                { value: 'INACTIVE', label: 'Không hoạt động' },
+                                { value: 'BANNED', label: 'Đã bị cấm' }
+                            ]}
+                        />
+
+                        {/* Sort */}
                         <button
-                            onClick={() => setFilterType('ALL')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterType === 'ALL' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                            onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
+                            className="bg-[#111114] border border-white/10 rounded-xl px-4 h-10 flex items-center gap-2 text-xs font-bold text-zinc-300 hover:text-white transition-colors"
                         >
-                            Tất cả
-                        </button>
-                        <button
-                            onClick={() => setFilterType('STAFF')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterType === 'STAFF' ? 'bg-indigo-500 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
-                        >
-                            Nhân sự
-                        </button>
-                        <button
-                            onClick={() => setFilterType('USER')}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${filterType === 'USER' ? 'bg-emerald-500 text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
-                        >
-                            Độc giả
+                            {sortOrder === 'desc' ? <UserCheck size={14} className="rotate-180" /> : <UserCheck size={14} />}
+                            {sortOrder === 'desc' ? 'Mới nhất' : 'Cũ nhất'}
                         </button>
                     </div>
-
-                    {/* Status Filter */}
-                    <CustomSelect
-                        value={statusFilter}
-                        onChange={(val) => setStatusFilter(val as any)}
-                        options={[
-                            { value: 'ALL', label: 'Mọi trạng thái' },
-                            { value: 'ACTIVE', label: 'Đang hoạt động' },
-                            { value: 'INACTIVE', label: 'Không hoạt động' },
-                            { value: 'BANNED', label: 'Đã bị cấm' }
-                        ]}
-                    />
-
-                    {/* Sort */}
-                    <button
-                        onClick={() => setSortOrder(prev => prev === 'desc' ? 'asc' : 'desc')}
-                        className="bg-[#111114] border border-white/10 rounded-xl px-4 h-10 flex items-center gap-2 text-xs font-bold text-zinc-300 hover:text-white transition-colors"
-                    >
-                        {sortOrder === 'desc' ? <UserCheck size={14} className="rotate-180" /> : <UserCheck size={14} />}
-                        {sortOrder === 'desc' ? 'Mới nhất' : 'Cũ nhất'}
-                    </button>
                 </div>
-            </div>
 
-            {/* Search */}
-            <div className="flex gap-4 mb-6">
-                <div className="relative flex-1 max-w-md">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Tìm kiếm theo tên hoặc email..."
-                        className="w-full bg-[#111114] border border-white/10 rounded-xl pl-10 pr-4 py-3 text-zinc-300 focus:outline-none focus:border-indigo-500 transition-all font-medium"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-            </div>
-
-            {/* Table */}
-            <div className="bg-[#111114] border border-white/[0.08] rounded-2xl overflow-hidden shadow-2xl">
-                <table className="w-full">
-                    <thead>
-                        <tr className="bg-white/[0.02] border-b border-white/[0.08] text-left">
-                            <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest">Thành viên</th>
-                            <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest text-center">Vai trò</th>
-                            <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest text-center">Trạng thái</th>
-                            <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest">Hoạt động gần nhất</th>
-                            <th className="px-6 py-4 text-xs font-bold text-zinc-500 uppercase tracking-widest text-right">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/[0.05]">
-                        {loading ? (
-                            <tr><td colSpan={5} className="px-6 py-8 text-center text-zinc-500">Đang tải...</td></tr>
-                        ) : users.length === 0 ? (
-                            <tr><td colSpan={5} className="px-6 py-8 text-center text-zinc-500">Không tìm thấy thành viên nào</td></tr>
-                        ) : (
-                            users.map((user) => (
-                                <tr key={user.id} className="hover:bg-white/[0.02] transition-colors group">
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden border border-white/10">
-                                                {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : <User size={20} className="text-zinc-500" />}
-                                            </div>
-                                            <div>
-                                                <div className="font-bold text-zinc-200">{user.name || 'No Name'}</div>
-                                                <div className="text-xs text-zinc-500">{user.email}</div>
-                                            </div>
+                <TableContainer>
+                    <TableHeader>
+                        <TableHead>Thành viên</TableHead>
+                        <TableHead align="center">Vai trò</TableHead>
+                        <TableHead align="center">Trạng thái</TableHead>
+                        <TableHead>Hoạt động gần nhất</TableHead>
+                        <TableHead align="right">Thao tác</TableHead>
+                    </TableHeader>
+                    <TableBody loading={loading} isEmpty={users.length === 0} emptyMessage="Không tìm thấy thành viên nào" colSpan={5}>
+                        {users.map((user) => (
+                            <TableRow key={user.id} className="group">
+                                <TableCell>
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center overflow-hidden border border-white/10">
+                                            {user.avatar ? <img src={user.avatar} className="w-full h-full object-cover" /> : <User size={20} className="text-zinc-500" />}
                                         </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
+                                        <div>
+                                            <div className="font-bold text-zinc-200">{user.name || 'No Name'}</div>
+                                            <div className="text-xs text-zinc-500">{user.email}</div>
+                                        </div>
+                                    </div>
+                                </TableCell>
+                                <TableCell align="center">
+                                    <button
+                                        onClick={() => openRoleModal(user)}
+                                        className="bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 px-3 py-1 rounded-lg text-xs font-bold uppercase transition-all flex items-center gap-2 mx-auto"
+                                    >
+                                        {getRoleLabel(user)}
+                                        <Shield size={12} className="text-indigo-400" />
+                                    </button>
+                                </TableCell>
+                                <TableCell align="center">
+                                    <StatusBadge status={user.status} pulse={user.status === 'ACTIVE'} />
+                                </TableCell>
+                                <TableCell>
+                                    <div className="text-xs text-zinc-400">
+                                        {user.activityLogs?.[0] ? (
+                                            <>
+                                                <span className="font-mono text-indigo-400 font-bold">{user.activityLogs[0].action}</span>
+                                                <div className="text-[10px] text-zinc-600 mt-0.5">{new Date(user.activityLogs[0].createdAt).toLocaleString('vi-VN')}</div>
+                                            </>
+                                        ) : (
+                                            <span className="text-zinc-600 italic">Chưa có hoạt động</span>
+                                        )}
+                                    </div>
+                                </TableCell>
+                                <TableCell align="right">
+                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button
-                                            onClick={() => openRoleModal(user)}
-                                            className="bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10 px-3 py-1 rounded-lg text-xs font-bold uppercase transition-all flex items-center gap-2 mx-auto"
+                                            onClick={() => setResettingId(user.id)}
+                                            className="p-2 hover:bg-indigo-500/20 text-zinc-400 hover:text-indigo-400 rounded-lg transition-colors"
+                                            title="Đổi mật khẩu"
                                         >
-                                            {getRoleLabel(user)}
-                                            <Shield size={12} className="text-indigo-400" />
+                                            <Lock size={16} />
                                         </button>
-                                    </td>
-                                    <td className="px-6 py-4 text-center">
-                                        <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${user.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                                            user.status === 'BANNED' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                                'bg-zinc-500/10 text-zinc-400 border-zinc-500/20'
-                                            }`}>
-                                            {user.status === 'ACTIVE' && <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>}
-                                            {user.status === 'ACTIVE' ? 'Đang hoạt động' : user.status === 'BANNED' ? 'Đã cấm' : 'Không hoạt động'}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="text-xs text-zinc-400">
-                                            {user.activityLogs?.[0] ? (
-                                                <>
-                                                    <span className="font-mono text-indigo-400 font-bold">{user.activityLogs[0].action}</span>
-                                                    <div className="text-[10px] text-zinc-600 mt-0.5">{new Date(user.activityLogs[0].createdAt).toLocaleString('vi-VN')}</div>
-                                                </>
-                                            ) : (
-                                                <span className="text-zinc-600 italic">Chưa có hoạt động</span>
-                                            )}
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {user.status === 'BANNED' ? (
                                             <button
-                                                onClick={() => setResettingId(user.id)}
-                                                className="p-2 hover:bg-indigo-500/20 text-zinc-400 hover:text-indigo-400 rounded-lg transition-colors"
-                                                title="Đổi mật khẩu"
+                                                onClick={() => handleStatusChange(user.id, 'ACTIVE')}
+                                                className="p-2 hover:bg-green-500/20 text-zinc-400 hover:text-green-400 rounded-lg transition-colors"
+                                                title="Mở khóa"
                                             >
-                                                <Lock size={16} />
+                                                <UserCheck size={16} />
                                             </button>
-                                            {user.status === 'BANNED' ? (
-                                                <button
-                                                    onClick={() => handleStatusChange(user.id, 'ACTIVE')}
-                                                    className="p-2 hover:bg-green-500/20 text-zinc-400 hover:text-green-400 rounded-lg transition-colors"
-                                                    title="Mở khóa"
-                                                >
-                                                    <UserCheck size={16} />
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleStatusChange(user.id, 'BANNED')}
-                                                    className="p-2 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 rounded-lg transition-colors"
-                                                    title="Cấm thành viên"
-                                                >
-                                                    <UserX size={16} />
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-                </table>
+                                        ) : (
+                                            <button
+                                                onClick={() => handleStatusChange(user.id, 'BANNED')}
+                                                className="p-2 hover:bg-red-500/20 text-zinc-400 hover:text-red-400 rounded-lg transition-colors"
+                                                title="Cấm thành viên"
+                                            >
+                                                <UserX size={16} />
+                                            </button>
+                                        )}
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </TableContainer>
             </div>
 
             {/* Pagination (Simplified) */}
