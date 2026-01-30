@@ -1,6 +1,6 @@
-# 📚 Site Comics - Nền tảng Đọc Truyện Tranh
+# 📚 Site Comics - Hệ Thống Đọc Truyện Tranh Trực Tuyến
 
-Một nền tảng đọc truyện tranh full-stack hiện đại được xây dựng với NestJS, Next.js và React, hỗ trợ quản lý nội dung mạnh mẽ và trải nghiệm người dùng tuyệt vời.
+> Nền tảng đọc truyện tranh full-stack hiện đại với quản lý nội dung mạnh mẽ, giao diện đẹp mắt và trải nghiệm người dùng tuyệt vời.
 
 ![Tech Stack](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
@@ -8,106 +8,242 @@ Một nền tảng đọc truyện tranh full-stack hiện đại được xây 
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
 
+---
+
 ## 📋 Mục Lục
 
-- [Tổng Quan](#-tổng-quan)
-- [Cấu Trúc Dự Án](#-cấu-trúc-dự-án)
+- [Giới Thiệu Dự Án](#-giới-thiệu-dự-án)
+- [Kiến Trúc Hệ Thống](#-kiến-trúc-hệ-thống)
+- [Các Thành Phần Chính](#-các-thành-phần-chính)
 - [Công Nghệ Sử Dụng](#-công-nghệ-sử-dụng)
 - [Yêu Cầu Hệ Thống](#-yêu-cầu-hệ-thống)
 - [Hướng Dẫn Cài Đặt](#-hướng-dẫn-cài-đặt)
-- [Hướng Dẫn Sử Dụng](#-hướng-dẫn-sử-dụng)
-- [Tính Năng](#-tính-năng)
+- [Hướng Dẫn Sử Dụng Chi Tiết](#-hướng-dẫn-sử-dụng-chi-tiết)
+- [Tính Năng Nổi Bật](#-tính-năng-nổi-bật)
 - [API Documentation](#-api-documentation)
 - [Troubleshooting](#-troubleshooting)
-- [License](#-license)
 
-## 🎯 Tổng Quan
+---
 
-**Site Comics** là một hệ thống quản lý và đọc truyện tranh trực tuyến bao gồm:
+## 🎯 Giới Thiệu Dự Án
 
-- **Backend API** - Server NestJS với MongoDB, xử lý logic nghiệp vụ và lưu trữ dữ liệu
-- **Frontend Website** - Giao diện người dùng Next.js với SSR/SSG để SEO tối ưu
-- **CMS Dashboard** - Bảng điều khiển quản trị React để quản lý nội dung
+**Site Comics** là một hệ thống quản lý và đọc truyện tranh trực tuyến hoàn chỉnh, được thiết kế để:
 
-## 📁 Cấu Trúc Dự Án
+- 📖 **Người đọc**: Trải nghiệm đọc truyện mượt mà, tìm kiếm dễ dàng, theo dõi truyện yêu thích
+- 👨‍💼 **Quản trị viên**: Quản lý nội dung truyện, chương, thể loại một cách trực quan và hiệu quả
+- 🎨 **Tùy biến cao**: Header/Footer động, Menu builder, SEO optimization
+
+### Tại sao chọn Site Comics?
+
+✅ **Kiến trúc hiện đại**: Tách biệt Frontend, Backend và CMS để dễ bảo trì và mở rộng  
+✅ **Performance cao**: SSR/SSG với Next.js, caching thông minh  
+✅ **Bảo mật tốt**: JWT authentication, role-based access control  
+✅ **SEO friendly**: Meta tags động, sitemap tự động  
+✅ **Responsive**: Hoạt động mượt mà trên mọi thiết bị  
+
+---
+
+## 🏗 Kiến Trúc Hệ Thống
 
 ```
-site-comics/
-├── backend/                 # NestJS API Server
-│   ├── src/
-│   │   ├── auth/           # Xác thực & phân quyền
-│   │   ├── comics/         # Quản lý truyện
-│   │   ├── chapters/       # Quản lý chương
-│   │   ├── categories/     # Quản lý thể loại
-│   │   ├── tags/           # Quản lý tags
-│   │   ├── users/          # Quản lý người dùng
-│   │   ├── media/          # Quản lý file upload
-│   │   ├── menus/          # Quản lý menu
-│   │   ├── settings/       # Cài đặt hệ thống
-│   │   └── layout/         # Header/Footer động
-│   ├── prisma/             # Database schema
-│   └── uploads/            # Thư mục lưu file upload
-│
-├── frontend/               # Next.js Website
-│   ├── src/
-│   │   ├── app/           # App Router (Next.js 14)
-│   │   ├── components/    # React components
-│   │   └── lib/           # Utilities & helpers
-│   └── public/            # Static assets
-│
-└── cms/                    # React Admin Dashboard
-    ├── src/
-    │   ├── presentation/  # UI Components & Pages
-    │   ├── infrastructure/# API Services
-    │   └── core/          # Business Logic
-    └── public/            # Static assets
+┌─────────────────────────────────────────────────────────────┐
+│                    NGƯỜI DÙNG                                │
+└─────────────────────────────────────────────────────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        │                   │                   │
+        ▼                   ▼                   ▼
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│   FRONTEND   │    │     CMS      │    │   MOBILE     │
+│  (Next.js)   │    │   (React)    │    │   (Future)   │
+│  Port: 3000  │    │  Port: 5173  │    │              │
+└──────────────┘    └──────────────┘    └──────────────┘
+        │                   │                   │
+        └───────────────────┼───────────────────┘
+                            │
+                            ▼
+                    ┌──────────────┐
+                    │   BACKEND    │
+                    │   (NestJS)   │
+                    │  Port: 3001  │
+                    └──────────────┘
+                            │
+                ┌───────────┼───────────┐
+                │           │           │
+                ▼           ▼           ▼
+        ┌──────────┐  ┌─────────┐  ┌─────────┐
+        │ MongoDB  │  │  Redis  │  │  Files  │
+        │ Database │  │  Cache  │  │ Storage │
+        └──────────┘  └─────────┘  └─────────┘
 ```
+
+---
+
+## 🧩 Các Thành Phần Chính
+
+### 1️⃣ Backend (NestJS API Server)
+
+**Vai trò**: Xử lý logic nghiệp vụ, quản lý database, xác thực người dùng
+
+**Chức năng chính**:
+- 🔐 Authentication & Authorization (JWT, Role-based)
+- 📚 CRUD operations cho Comics, Chapters, Categories, Tags
+- 📁 File upload & management
+- 🎨 Dynamic Layout (Header/Footer/Menu)
+- ⚙️ System settings & SEO configuration
+- 📊 Analytics & statistics
+
+**Cấu trúc thư mục**:
+```
+backend/
+├── src/
+│   ├── auth/              # Xác thực & phân quyền
+│   ├── comics/            # Quản lý truyện
+│   ├── chapters/          # Quản lý chương
+│   ├── categories/        # Quản lý thể loại
+│   ├── tags/              # Quản lý tags
+│   ├── users/             # Quản lý người dùng
+│   ├── media/             # Upload & quản lý file
+│   ├── menus/             # Menu builder
+│   ├── layout/            # Header/Footer động
+│   ├── settings/          # Cài đặt hệ thống
+│   ├── prisma/            # Database client
+│   └── common/            # Shared utilities
+├── prisma/
+│   └── schema.prisma      # Database schema
+└── uploads/               # Thư mục lưu file upload
+```
+
+### 2️⃣ Frontend (Next.js Website)
+
+**Vai trò**: Giao diện người dùng cuối, hiển thị truyện, tương tác
+
+**Chức năng chính**:
+- 🏠 Trang chủ với truyện nổi bật, mới cập nhật
+- 📖 Trang đọc truyện với trải nghiệm mượt mà
+- 🔍 Tìm kiếm & lọc truyện theo thể loại, tags
+- 👤 Trang cá nhân, lịch sử đọc, bookmark
+- 💬 Bình luận & đánh giá
+- 🌙 Dark mode
+- 📱 Responsive design
+
+**Cấu trúc thư mục**:
+```
+frontend/
+├── src/
+│   ├── app/               # App Router (Next.js 14)
+│   │   ├── page.tsx       # Trang chủ
+│   │   ├── comics/        # Danh sách & chi tiết truyện
+│   │   ├── read/          # Trang đọc truyện
+│   │   └── user/          # Trang người dùng
+│   ├── components/        # React components
+│   │   ├── layout/        # Header, Footer, Sidebar
+│   │   ├── comic/         # Comic card, list
+│   │   └── ui/            # Button, Input, Modal...
+│   └── lib/               # Utilities, API client
+└── public/                # Static assets
+```
+
+### 3️⃣ CMS (React Admin Dashboard)
+
+**Vai trò**: Bảng điều khiển quản trị nội dung
+
+**Chức năng chính**:
+- 📊 Dashboard với thống kê tổng quan
+- 📚 Quản lý truyện & chương (CRUD)
+- 🖼️ Thư viện ảnh với upload, tìm kiếm
+- 🏷️ Quản lý thể loại & tags
+- 🎨 Header/Footer Builder (Drag & Drop)
+- 🧭 Menu Builder
+- 👥 Quản lý người dùng & phân quyền
+- ⚙️ Cài đặt SEO & hệ thống
+
+**Cấu trúc thư mục**:
+```
+cms/
+├── src/
+│   ├── presentation/      # UI Layer
+│   │   ├── pages/         # Các trang quản lý
+│   │   │   ├── ComicsManager.tsx
+│   │   │   ├── ChaptersManager.tsx
+│   │   │   ├── MediaManager.tsx
+│   │   │   ├── HeaderBuilder.tsx
+│   │   │   └── MenuBuilder.tsx
+│   │   └── components/    # Reusable components
+│   ├── infrastructure/    # API Services
+│   │   └── api.service.ts
+│   └── core/              # Business logic
+│       └── interfaces.ts
+└── public/                # Static assets
+```
+
+---
 
 ## 🛠 Công Nghệ Sử Dụng
 
-### Backend
-- **NestJS** - Framework Node.js enterprise-grade
-- **Prisma ORM** - Type-safe database client
-- **MongoDB** - NoSQL database
-- **JWT** - Authentication & Authorization
-- **Passport.js** - Authentication middleware
-- **Multer** - File upload handling
-- **Helmet** - Security headers
-- **Class Validator** - DTO validation
+### Backend Stack
+| Công nghệ | Phiên bản | Mục đích |
+|-----------|-----------|----------|
+| **NestJS** | ^11.0.1 | Framework chính |
+| **Prisma** | ^6.2.1 | ORM cho MongoDB |
+| **MongoDB** | ^6.0 | Database |
+| **Passport.js** | ^0.7.0 | Authentication |
+| **JWT** | ^11.0.2 | Token-based auth |
+| **Multer** | Built-in | File upload |
+| **Helmet** | ^8.1.0 | Security headers |
+| **Class Validator** | ^0.14.3 | DTO validation |
 
-### Frontend
-- **Next.js 14** - React framework với App Router
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Utility-first CSS
-- **React Query** - Data fetching & caching
-- **Zustand** - State management
-- **Lucide Icons** - Icon library
+### Frontend Stack
+| Công nghệ | Phiên bản | Mục đích |
+|-----------|-----------|----------|
+| **Next.js** | 14.x | React framework |
+| **React** | 18.x | UI library |
+| **TypeScript** | 5.x | Type safety |
+| **Tailwind CSS** | 3.x | Styling |
+| **React Query** | Latest | Data fetching |
+| **Zustand** | Latest | State management |
+| **Lucide Icons** | Latest | Icons |
 
-### CMS
-- **React 18** - UI library
-- **Vite** - Build tool
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **React Router** - Client-side routing
-- **React Hot Toast** - Notifications
-- **@dnd-kit** - Drag & drop functionality
+### CMS Stack
+| Công nghệ | Phiên bản | Mục đích |
+|-----------|-----------|----------|
+| **React** | 18.x | UI library |
+| **Vite** | 5.x | Build tool |
+| **TypeScript** | 5.x | Type safety |
+| **Tailwind CSS** | 3.x | Styling |
+| **React Router** | 6.x | Routing |
+| **@dnd-kit** | Latest | Drag & drop |
+| **React Hot Toast** | Latest | Notifications |
+
+---
 
 ## 💻 Yêu Cầu Hệ Thống
 
-Trước khi bắt đầu, đảm bảo máy tính của bạn đã cài đặt:
+### Phần mềm bắt buộc
 
-- **Node.js** >= 18.0.0 ([Download](https://nodejs.org/))
-- **npm** >= 9.0.0 hoặc **yarn** >= 1.22.0
-- **MongoDB** >= 6.0 ([Download](https://www.mongodb.com/try/download/community))
-- **Git** ([Download](https://git-scm.com/downloads))
+| Phần mềm | Phiên bản tối thiểu | Link tải |
+|----------|---------------------|----------|
+| **Node.js** | 18.0.0 | [nodejs.org](https://nodejs.org/) |
+| **npm** | 9.0.0 | Đi kèm Node.js |
+| **MongoDB** | 6.0 | [mongodb.com](https://www.mongodb.com/try/download/community) |
+| **Git** | 2.x | [git-scm.com](https://git-scm.com/downloads) |
 
-### Kiểm tra phiên bản đã cài đặt:
+### Kiểm tra phiên bản
 
 ```bash
-node --version    # v18.x.x trở lên
-npm --version     # 9.x.x trở lên
-mongo --version   # 6.x.x trở lên
+node --version    # Kết quả: v18.x.x hoặc cao hơn
+npm --version     # Kết quả: 9.x.x hoặc cao hơn
+mongo --version   # Kết quả: 6.x.x hoặc cao hơn
+git --version     # Kết quả: 2.x.x hoặc cao hơn
 ```
+
+### Cấu hình khuyến nghị
+
+- **RAM**: Tối thiểu 4GB (khuyến nghị 8GB+)
+- **Ổ cứng**: 5GB trống
+- **CPU**: 2 cores trở lên
+
+---
 
 ## 🚀 Hướng Dẫn Cài Đặt
 
@@ -121,22 +257,35 @@ cd site-comics
 ### Bước 2: Cài Đặt MongoDB
 
 #### Windows:
-1. Download MongoDB Community Server từ [trang chính thức](https://www.mongodb.com/try/download/community)
-2. Cài đặt và chạy MongoDB như một service
-3. Mặc định MongoDB sẽ chạy tại `mongodb://localhost:27017`
+1. Download [MongoDB Community Server](https://www.mongodb.com/try/download/community)
+2. Chạy file cài đặt, chọn "Complete" installation
+3. Tick "Install MongoDB as a Service"
+4. MongoDB sẽ tự động chạy tại `mongodb://localhost:27017`
 
-#### macOS (với Homebrew):
+#### macOS (Homebrew):
 ```bash
 brew tap mongodb/brew
-brew install mongodb-community
-brew services start mongodb-community
+brew install mongodb-community@6.0
+brew services start mongodb-community@6.0
 ```
 
 #### Linux (Ubuntu/Debian):
 ```bash
+wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+sudo apt-get update
 sudo apt-get install -y mongodb-org
 sudo systemctl start mongod
 sudo systemctl enable mongod
+```
+
+**Kiểm tra MongoDB đã chạy:**
+```bash
+# Windows
+net start MongoDB
+
+# macOS/Linux
+sudo systemctl status mongod
 ```
 
 ### Bước 3: Cấu Hình Backend
@@ -146,40 +295,47 @@ cd backend
 npm install
 ```
 
-Tạo file `.env` trong thư mục `backend/`:
+**Tạo file `.env`** trong thư mục `backend/`:
 
 ```env
-# Database
+# Database Connection
 DATABASE_URL="mongodb://127.0.0.1:27017/site-comics"
 
-# JWT Secret (thay đổi thành chuỗi bí mật của bạn)
-JWT_SECRET="your-super-secret-jwt-key-change-this-in-production"
+# JWT Configuration
+JWT_SECRET="your-super-secret-jwt-key-change-this-in-production-12345"
+JWT_EXPIRES_IN="7d"
 
-# API URL
+# Server Configuration
+PORT=3001
 API_URL="http://localhost:3001"
 
-# Redis (Optional - nếu sử dụng cache)
+# CORS Configuration
+ALLOWED_ORIGINS="http://localhost:3000,http://localhost:3002,http://localhost:5173"
+
+# Redis (Optional - for caching)
 REDIS_HOST="localhost"
 REDIS_PORT=6379
 
-# Email Configuration (Optional - cho tính năng gửi email)
+# Email Configuration (Optional)
 MAIL_USER="your-email@gmail.com"
 MAIL_PASSWORD="your-app-password"
+MAIL_FROM="Site Comics <noreply@sitecomics.com>"
 
-# CORS Origins
-ALLOWED_ORIGINS="http://localhost:3000,http://localhost:3002,http://localhost:5173"
+# Upload Configuration
+MAX_FILE_SIZE=10485760  # 10MB in bytes
+ALLOWED_FILE_TYPES="image/jpeg,image/png,image/webp"
 ```
 
-Khởi tạo database:
+**Khởi tạo Database:**
 
 ```bash
+# Generate Prisma Client
 npx prisma generate
+
+# Push schema to database
 npx prisma db push
-```
 
-Seed dữ liệu mẫu (optional):
-
-```bash
+# Seed initial data (optional)
 npx prisma db seed
 ```
 
@@ -190,10 +346,18 @@ cd ../frontend
 npm install
 ```
 
-Tạo file `.env.local` trong thư mục `frontend/`:
+**Tạo file `.env.local`** trong thư mục `frontend/`:
 
 ```env
+# API Endpoint
 NEXT_PUBLIC_API_URL=http://localhost:3001
+
+# Site Configuration
+NEXT_PUBLIC_SITE_NAME="Site Comics"
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# Analytics (Optional)
+NEXT_PUBLIC_GA_ID=your-google-analytics-id
 ```
 
 ### Bước 5: Cấu Hình CMS
@@ -203,20 +367,31 @@ cd ../cms
 npm install
 ```
 
-Tạo file `.env` trong thư mục `cms/`:
+**Tạo file `.env`** trong thư mục `cms/`:
 
 ```env
+# API Endpoint
 VITE_API_URL=http://localhost:3001
+
+# CMS Configuration
+VITE_APP_NAME="Site Comics CMS"
 ```
 
-### Bước 6: Khởi Động Các Services
+### Bước 6: Khởi Động Hệ Thống
 
-Mở 3 terminal riêng biệt:
+Mở **3 terminal riêng biệt**:
 
 #### Terminal 1 - Backend (Port 3001):
 ```bash
 cd backend
 npm run start:dev
+```
+
+Kết quả thành công:
+```
+[Nest] 12345  - 01/30/2026, 9:00:00 PM     LOG [NestFactory] Starting Nest application...
+[Nest] 12345  - 01/30/2026, 9:00:01 PM     LOG [InstanceLoader] AppModule dependencies initialized
+[Nest] 12345  - 01/30/2026, 9:00:02 PM     LOG [NestApplication] Nest application successfully started
 ```
 
 #### Terminal 2 - Frontend (Port 3000):
@@ -225,168 +400,480 @@ cd frontend
 npm run dev
 ```
 
+Kết quả thành công:
+```
+  ▲ Next.js 14.x.x
+  - Local:        http://localhost:3000
+  - Network:      http://192.168.x.x:3000
+
+ ✓ Ready in 2.5s
+```
+
 #### Terminal 3 - CMS (Port 5173):
 ```bash
 cd cms
 npm run dev
 ```
 
+Kết quả thành công:
+```
+  VITE v5.x.x  ready in 500 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: http://192.168.x.x:5173/
+```
+
 ### Bước 7: Truy Cập Ứng Dụng
 
-- **Frontend Website**: http://localhost:3000
-- **CMS Dashboard**: http://localhost:5173
-- **Backend API**: http://localhost:3001
+| Ứng dụng | URL | Mô tả |
+|----------|-----|-------|
+| **Frontend** | http://localhost:3000 | Website người dùng |
+| **CMS** | http://localhost:5173 | Bảng điều khiển admin |
+| **API** | http://localhost:3001 | Backend API |
 
-## 📖 Hướng Dẫn Sử Dụng
+---
 
-### Đăng Nhập CMS
+## 📖 Hướng Dẫn Sử Dụng Chi Tiết
 
-Sau khi seed database, sử dụng tài khoản mặc định:
+### 🔐 Đăng Nhập CMS
 
-```
-Email: admin@example.com
-Password: admin123
-```
+1. Truy cập http://localhost:5173
+2. Sử dụng tài khoản mặc định:
+   ```
+   Email: admin@example.com
+   Password: admin123
+   ```
+3. **⚠️ QUAN TRỌNG**: Đổi mật khẩu ngay sau lần đăng nhập đầu tiên!
 
-**⚠️ Quan trọng**: Thay đổi mật khẩu ngay sau lần đăng nhập đầu tiên!
+---
 
-### Quản Lý Truyện
+### 📚 Quản Lý Truyện
 
-#### 1. Thêm Truyện Mới
+#### ➕ Thêm Truyện Mới
 
-1. Truy cập CMS tại http://localhost:5173
-2. Đăng nhập với tài khoản admin
-3. Vào menu **"Quản lý Truyện"** → **"Thêm truyện"**
-4. Điền thông tin:
-   - Tên truyện
-   - Tác giả
-   - Mô tả
-   - Thể loại
-   - Tags
-   - Ảnh bìa (upload từ Thư viện ảnh)
-5. Click **"Lưu"**
+**Bước 1**: Vào menu **"Quản lý Truyện"** → Click **"Thêm truyện"**
 
-#### 2. Thêm Chương
+**Bước 2**: Điền thông tin cơ bản:
 
-1. Trong danh sách truyện, click vào icon **"Quản lý chương"**
-2. Click **"Thêm chương"**
-3. Nhập số chương và tiêu đề
-4. Upload ảnh cho chương (có thể upload nhiều ảnh cùng lúc)
-5. Sắp xếp thứ tự ảnh bằng drag & drop
-6. Click **"Lưu"**
+| Trường | Mô tả | Bắt buộc |
+|--------|-------|----------|
+| **Tên truyện** | Tiêu đề truyện | ✅ |
+| **Tác giả** | Tên tác giả | ✅ |
+| **Mô tả** | Tóm tắt nội dung | ✅ |
+| **Trạng thái** | Đang tiến hành / Hoàn thành | ✅ |
+| **Ảnh bìa** | Upload từ Thư viện ảnh | ✅ |
 
-### Quản Lý Thể Loại & Tags
+**Bước 3**: Chọn thể loại & tags:
+- Click vào dropdown **"Thể loại"**
+- Chọn 1 hoặc nhiều thể loại (Action, Romance, Fantasy...)
+- Tương tự với **"Tags"** (#Harem, #Isekai...)
+
+**Bước 4**: Click **"Lưu"**
+
+#### ✏️ Chỉnh Sửa Truyện
+
+1. Trong danh sách truyện, click icon **✏️ (Edit)**
+2. Cập nhật thông tin cần thiết
+3. Click **"Lưu thay đổi"**
+
+#### 🗑️ Xóa Truyện
+
+**Xóa đơn lẻ**:
+1. Click icon **🗑️ (Delete)** bên cạnh truyện
+2. Xác nhận xóa
+
+**Xóa hàng loạt**:
+1. Tick checkbox các truyện cần xóa
+2. Click **"Xóa X truyện"** ở góc trên
+3. Xác nhận
+
+**Mẹo**: 
+- Shift + Click để chọn nhiều truyện liên tiếp
+- Ctrl/Cmd + Click để chọn từng truyện riêng lẻ
+
+---
+
+### 📖 Quản Lý Chương
+
+#### ➕ Thêm Chương Mới
+
+**Bước 1**: Trong danh sách truyện, click icon **📋 (Quản lý chương)**
+
+**Bước 2**: Click **"Thêm chương"**
+
+**Bước 3**: Nhập thông tin:
+- **Số chương**: Ví dụ: 1, 2, 3...
+- **Tiêu đề**: Ví dụ: "Chương 1: Khởi đầu"
+
+**Bước 4**: Upload ảnh chương:
+- Click **"Chọn ảnh"** hoặc kéo thả file vào
+- Có thể upload nhiều ảnh cùng lúc
+- Định dạng hỗ trợ: JPG, PNG, WEBP
+- Kích thước tối đa: 10MB/ảnh
+
+**Bước 5**: Sắp xếp thứ tự ảnh:
+- Kéo thả ảnh để sắp xếp lại
+- Ảnh đầu tiên = trang đầu tiên
+
+**Bước 6**: Click **"Lưu"**
+
+#### ✏️ Chỉnh Sửa Chương
+
+1. Click vào chương cần sửa
+2. Cập nhật tiêu đề hoặc thêm/xóa ảnh
+3. Click **"Lưu thay đổi"**
+
+---
+
+### 🏷️ Quản Lý Thể Loại & Tags
 
 #### Thể Loại (Categories)
-- Vào **"Quản lý Thể loại"**
-- Click **"Thêm thể loại"**
-- Nhập tên và slug (tự động tạo từ tên)
-- Có thể tạo thể loại con bằng cách chọn thể loại cha
 
-#### Tags (Nhãn)
-- Vào **"Tags (Nhãn)"**
-- Click **"Thêm Tag"**
-- Nhập tên tag (ví dụ: #Fantasy, #Action)
-- Slug tự động tạo
-
-### Quản Lý Header/Footer Động
-
-#### Header Builder
-1. Vào **"Header Builder"**
-2. Kéo thả các block từ thanh bên trái vào 3 vùng:
-   - **Top Row**: Vùng trên cùng
-   - **Center Row**: Vùng giữa (chính)
-   - **Bottom Row**: Vùng dưới
-3. Các block có sẵn:
-   - **Logo**: Logo website
-   - **Menu**: Menu điều hướng
-   - **Search**: Thanh tìm kiếm
-   - **User Menu**: Menu người dùng
-   - **Banner Slider**: Slider quảng cáo
-   - **HTML**: Tùy chỉnh HTML
-4. Click vào block để chỉnh sửa cấu hình
-5. Click **"Lưu Header"** để áp dụng
-
-#### Menu Builder
-1. Vào **"Menu Builder"**
-2. Click **"Tạo Menu mới"**
-3. Thêm các menu item:
-   - Nhập label và URL
-   - Kéo thả để sắp xếp
-   - Indent/Outdent để tạo submenu
+**Thêm thể loại mới**:
+1. Vào **"Quản lý Thể loại"**
+2. Click **"Thêm thể loại"**
+3. Nhập:
+   - **Tên**: Ví dụ: "Action"
+   - **Slug**: Tự động tạo từ tên (action)
+   - **Thể loại cha** (optional): Để tạo thể loại con
 4. Click **"Lưu"**
 
-### Quản Lý Media (Thư Viện Ảnh)
+**Ví dụ cấu trúc thể loại**:
+```
+Action
+├── Martial Arts
+└── Superpowers
+Romance
+├── School Life
+└── Drama
+```
 
-1. Vào **"Thư viện ảnh"**
-2. Click **"Tải lên"** để upload ảnh mới
-3. Click vào ảnh để xem chi tiết và chỉnh sửa:
-   - Caption (tiêu đề)
-   - Alt text (văn bản thay thế)
-4. Click **"Sao chép URL"** để lấy đường dẫn ảnh
-5. Sử dụng Shift + Click để chọn nhiều ảnh
-6. Ctrl/Cmd + Click để chọn từng ảnh riêng lẻ
+#### Tags (Nhãn)
 
-### Cài Đặt Hệ Thống
+**Thêm tag mới**:
+1. Vào **"Tags (Nhãn)"**
+2. Click **"Thêm Tag"**
+3. Nhập tên tag (ví dụ: #Fantasy, #Isekai)
+4. Slug tự động tạo
+5. Click **"Lưu"**
+
+---
+
+### 🎨 Header Builder (Xây Dựng Header Động)
+
+Header Builder cho phép bạn tùy chỉnh header website bằng cách kéo thả các block.
+
+#### Các Block Có Sẵn
+
+| Block | Mô tả | Cấu hình |
+|-------|-------|----------|
+| **Logo** | Logo website | Upload ảnh, link |
+| **Menu** | Menu điều hướng | Chọn menu đã tạo |
+| **Search** | Thanh tìm kiếm | Placeholder text |
+| **User Menu** | Menu người dùng | Đăng nhập/Đăng ký |
+| **Banner Slider** | Slider quảng cáo | Thêm slides với ảnh, tiêu đề, link |
+| **HTML** | Tùy chỉnh HTML | Nhập code HTML |
+
+#### Cách Sử Dụng
+
+**Bước 1**: Vào **"Header Builder"**
+
+**Bước 2**: Kéo block từ thanh bên trái vào 3 vùng:
+- **Top Row**: Vùng trên cùng (thường để thông báo, hotline)
+- **Center Row**: Vùng chính (logo, menu, search)
+- **Bottom Row**: Vùng dưới (menu phụ, banner)
+
+**Bước 3**: Click vào block để cấu hình:
+
+**Ví dụ cấu hình Banner Slider**:
+1. Click vào block "Banner Slider"
+2. Click **"Thêm slide"**
+3. Nhập:
+   - **Tiêu đề**: "Truyện mới: Shadow Blade"
+   - **Link**: "/comics/shadow-blade"
+   - **Ảnh**: Click để chọn từ thư viện
+4. Thêm nhiều slide nếu cần
+5. Click **"Áp dụng"**
+
+**Bước 4**: Click **"Lưu Header"** để áp dụng
+
+**Mẹo**:
+- Kéo block ra ngoài để xóa
+- Sắp xếp lại bằng cách kéo thả
+- Tick "Ẩn trên thiết bị di động" nếu cần
+
+---
+
+### 🧭 Menu Builder (Xây Dựng Menu)
+
+#### Tạo Menu Mới
+
+**Bước 1**: Vào **"Menu Builder"** → Click **"Tạo Menu mới"**
+
+**Bước 2**: Nhập tên menu (ví dụ: "Main Menu", "Footer Menu")
+
+**Bước 3**: Thêm menu items:
+
+**Cách 1: Thêm thủ công**
+1. Click **"Thêm item"**
+2. Nhập:
+   - **Label**: Tên hiển thị (ví dụ: "Trang chủ")
+   - **URL**: Đường dẫn (ví dụ: "/")
+   - **Icon** (optional): Chọn icon
+3. Click **"Thêm"**
+
+**Cách 2: Thêm từ danh sách có sẵn**
+1. Chọn tab **"Thể loại"** hoặc **"Trang"**
+2. Tick các item cần thêm
+3. Click **"Thêm vào menu"**
+
+**Bước 4**: Sắp xếp & tạo submenu:
+- **Kéo thả** để sắp xếp thứ tự
+- **Indent** (→) để tạo submenu
+- **Outdent** (←) để đưa ra ngoài
+
+**Ví dụ cấu trúc menu**:
+```
+Trang chủ
+Thể loại
+├── Action
+├── Romance
+└── Fantasy
+Truyện mới
+Xếp hạng
+```
+
+**Bước 5**: Click **"Lưu"**
+
+---
+
+### 🖼️ Thư Viện Ảnh (Media Manager)
+
+#### Upload Ảnh
+
+**Cách 1: Click nút Upload**
+1. Click **"Tải lên"**
+2. Chọn file từ máy tính
+3. Đợi upload hoàn tất
+
+**Cách 2: Kéo thả**
+1. Kéo file ảnh từ máy tính
+2. Thả vào vùng upload
+3. Đợi upload hoàn tất
+
+**Lưu ý**:
+- Định dạng hỗ trợ: JPG, PNG, WEBP
+- Kích thước tối đa: 10MB
+- Có thể upload nhiều ảnh cùng lúc
+
+#### Quản Lý Ảnh
+
+**Xem chi tiết ảnh**:
+1. Click vào ảnh
+2. Panel bên phải hiển thị:
+   - Preview ảnh
+   - Tên file
+   - Kích thước
+   - Loại file
+   - Người upload
+   - Ngày upload
+
+**Chỉnh sửa thông tin**:
+1. Click vào ảnh
+2. Nhập:
+   - **Caption**: Tiêu đề ảnh
+   - **Alt text**: Văn bản thay thế (quan trọng cho SEO)
+3. Thông tin tự động lưu khi blur
+
+**Sao chép URL**:
+1. Click vào ảnh
+2. Click **"Sao chép URL"**
+3. Paste vào nơi cần dùng
+
+**Xóa ảnh**:
+- **Xóa đơn lẻ**: Click vào ảnh → **"Xóa vĩnh viễn"**
+- **Xóa hàng loạt**: 
+  1. Shift + Click để chọn nhiều
+  2. Click **"Xóa X ảnh"**
+  3. Xác nhận
+
+---
+
+### ⚙️ Cài Đặt Hệ Thống
 
 #### SEO Settings
+
 1. Vào **"Cấu hình SEO"**
 2. Cấu hình:
-   - Site Title
-   - Meta Description
-   - Keywords
-   - Open Graph tags
-   - Twitter Card
+
+| Trường | Mô tả | Ví dụ |
+|--------|-------|-------|
+| **Site Title** | Tiêu đề website | "Site Comics - Đọc Truyện Tranh Online" |
+| **Meta Description** | Mô tả ngắn | "Đọc truyện tranh miễn phí, cập nhật nhanh nhất" |
+| **Keywords** | Từ khóa SEO | "truyện tranh, manga, manhwa, comic" |
+| **OG Image** | Ảnh chia sẻ social | Upload ảnh 1200x630px |
+| **Twitter Card** | Loại card Twitter | Summary Large Image |
+
+3. Click **"Lưu"**
 
 #### General Settings
+
 1. Vào **"Cài đặt chung"**
 2. Cấu hình:
-   - Tên website
-   - Logo
-   - Favicon
-   - Thông tin liên hệ
-   - Social media links
+   - **Tên website**
+   - **Logo** (upload ảnh)
+   - **Favicon** (upload .ico hoặc .png)
+   - **Email liên hệ**
+   - **Số điện thoại**
+   - **Địa chỉ**
+   - **Social media links** (Facebook, Twitter, Instagram...)
 
-## ✨ Tính Năng
+3. Click **"Lưu thay đổi"**
 
-### Frontend (Website)
-- ✅ Giao diện responsive, tối ưu mobile
-- ✅ Server-Side Rendering (SSR) cho SEO
-- ✅ Đọc truyện với trải nghiệm mượt mà
-- ✅ Tìm kiếm truyện nâng cao
-- ✅ Lọc theo thể loại, tags
-- ✅ Lịch sử đọc truyện
-- ✅ Bookmark/Theo dõi truyện
-- ✅ Bình luận & đánh giá
-- ✅ Dark mode
-- ✅ Header/Footer động
+---
+
+### 👥 Quản Lý Người Dùng
+
+#### Xem Danh Sách Người Dùng
+
+1. Vào **"Quản lý Người dùng"**
+2. Xem thông tin:
+   - Tên, email
+   - Vai trò (Admin, User, Moderator)
+   - Trạng thái (Active, Banned)
+   - Ngày đăng ký
+
+#### Phân Quyền
+
+1. Click icon **⚙️** bên cạnh người dùng
+2. Chọn vai trò mới:
+   - **Admin**: Toàn quyền
+   - **Moderator**: Quản lý nội dung
+   - **User**: Người dùng thường
+3. Click **"Lưu"**
+
+#### Khóa/Mở Khóa Tài Khoản
+
+1. Click icon **🔒** để khóa
+2. Click icon **🔓** để mở khóa
+
+---
+
+## 🎨 Tính Năng Nổi Bật
+
+### Frontend (Website Người Dùng)
+
+#### 🏠 Trang Chủ
+- Hero banner với truyện nổi bật
+- Danh sách truyện mới cập nhật
+- Truyện xem nhiều nhất
+- Thể loại phổ biến
+- Dark mode toggle
+
+#### 📖 Trang Đọc Truyện
+- Đọc truyện mượt mà, không giật lag
+- Chuyển chương dễ dàng (← →)
+- Fullscreen mode
+- Bookmark tự động vị trí đọc
+- Bình luận theo chương
+
+#### 🔍 Tìm Kiếm & Lọc
+- Tìm kiếm theo tên, tác giả
+- Lọc theo thể loại
+- Lọc theo tags
+- Sắp xếp (mới nhất, xem nhiều, đánh giá cao)
+- Pagination
+
+#### 👤 Trang Cá Nhân
+- Lịch sử đọc
+- Truyện đang theo dõi
+- Truyện yêu thích
+- Cài đặt tài khoản
 
 ### CMS (Admin Dashboard)
-- ✅ Dashboard với thống kê
-- ✅ Quản lý truyện & chương
-- ✅ Upload & quản lý media
-- ✅ Quản lý thể loại & tags
-- ✅ Header/Footer builder với drag & drop
-- ✅ Menu builder
-- ✅ Quản lý người dùng & phân quyền
-- ✅ Cấu hình SEO
-- ✅ Cài đặt hệ thống
-- ✅ Multi-select với Shift/Ctrl
-- ✅ Bulk actions (xóa hàng loạt)
+
+#### 📊 Dashboard
+- Thống kê tổng quan:
+  - Tổng số truyện
+  - Tổng số chương
+  - Tổng số người dùng
+  - Lượt xem hôm nay
+- Biểu đồ lượt xem theo thời gian
+- Truyện mới nhất
+- Người dùng mới
+
+#### 📚 Quản Lý Truyện
+- CRUD operations
+- Upload ảnh bìa
+- Quản lý thể loại & tags
+- Trạng thái (Ongoing, Completed)
+- Multi-select & bulk actions
+- Tìm kiếm & lọc
+
+#### 📖 Quản Lý Chương
+- CRUD operations
+- Upload nhiều ảnh cùng lúc
+- Drag & drop để sắp xếp ảnh
+- Preview chương
+
+#### 🖼️ Thư Viện Ảnh
+- Upload ảnh (drag & drop)
+- Quản lý metadata (caption, alt)
+- Tìm kiếm ảnh
+- Multi-select
+- Copy URL nhanh
+- Nhóm theo tháng upload
+
+#### 🎨 Header/Footer Builder
+- Drag & drop interface
+- 6+ block types
+- Live preview
+- Responsive settings
+- Lưu & publish
+
+#### 🧭 Menu Builder
+- Tạo menu không giới hạn
+- Drag & drop để sắp xếp
+- Indent/Outdent cho submenu
+- Thêm từ thể loại/trang có sẵn
+- Icon support
 
 ### Backend (API)
-- ✅ RESTful API
-- ✅ JWT Authentication
-- ✅ Role-based Access Control (RBAC)
-- ✅ File upload với validation
-- ✅ Database với Prisma ORM
-- ✅ API documentation
-- ✅ Rate limiting
-- ✅ CORS configuration
-- ✅ Security headers (Helmet)
-- ✅ Input validation
+
+#### 🔐 Authentication & Authorization
+- JWT-based authentication
+- Role-based access control (RBAC)
+- Refresh token
+- Password hashing (bcrypt)
+
+#### 📁 File Upload
+- Multer integration
+- File type validation
+- Size limit
+- Auto-generate unique filename
+- Serve static files
+
+#### 🗄️ Database
+- MongoDB với Prisma ORM
+- Type-safe queries
+- Migrations
+- Seeding
+
+#### 🛡️ Security
+- Helmet (security headers)
+- CORS configuration
+- Rate limiting
+- Input validation (class-validator)
+- XSS protection
+
+---
 
 ## 📚 API Documentation
+
+### Base URL
+```
+http://localhost:3001
+```
 
 ### Authentication
 
@@ -402,6 +889,19 @@ Content-Type: application/json
 }
 ```
 
+**Response**:
+```json
+{
+  "user": {
+    "id": "user-id",
+    "email": "user@example.com",
+    "name": "User Name",
+    "role": "USER"
+  },
+  "token": "jwt-token"
+}
+```
+
 #### Login
 ```http
 POST /auth/login
@@ -413,11 +913,55 @@ Content-Type: application/json
 }
 ```
 
+**Response**:
+```json
+{
+  "user": {
+    "id": "user-id",
+    "email": "user@example.com",
+    "name": "User Name",
+    "role": "USER"
+  },
+  "token": "jwt-token"
+}
+```
+
 ### Comics
 
 #### Get All Comics
 ```http
-GET /comics?page=1&limit=20&search=keyword
+GET /comics?page=1&limit=20&search=keyword&category=action
+```
+
+**Response**:
+```json
+[
+  {
+    "id": "comic-id",
+    "title": "Shadow Blade: Eternal Night",
+    "slug": "shadow-blade-eternal-night",
+    "thumbnail": "http://localhost:3001/uploads/image.jpg",
+    "author": "Ginger Art",
+    "description": "Trong một thế giới bị bao phủ bởi bóng đêm...",
+    "status": "ongoing",
+    "rating": 4.8,
+    "views": 1200000,
+    "categories": [
+      { "id": "cat-id", "name": "Action" }
+    ],
+    "tags": [],
+    "chapters": [
+      {
+        "id": "chapter-id",
+        "number": 10,
+        "title": "Chương 10",
+        "slug": "chapter-10"
+      }
+    ],
+    "createdAt": "2026-01-28T03:21:42.434Z",
+    "updatedAt": "2026-01-30T04:57:44.363Z"
+  }
+]
 ```
 
 #### Get Comic by ID
@@ -432,10 +976,11 @@ Authorization: Bearer {token}
 Content-Type: application/json
 
 {
-  "title": "Comic Title",
+  "title": "New Comic",
   "author": "Author Name",
-  "description": "Description",
+  "description": "Description here",
   "thumbnail": "image-url",
+  "status": "ongoing",
   "categoryIds": ["cat-id-1", "cat-id-2"],
   "tagIds": ["tag-id-1"]
 }
@@ -448,7 +993,38 @@ Authorization: Bearer {token}
 Content-Type: application/json
 
 {
-  "title": "Updated Title"
+  "title": "Updated Title",
+  "status": "completed"
+}
+```
+
+#### Delete Comic (Admin only)
+```http
+DELETE /comics/:id
+Authorization: Bearer {token}
+```
+
+### Chapters
+
+#### Get Chapters by Comic ID
+```http
+GET /chapters/comic/:comicId
+```
+
+#### Create Chapter (Admin only)
+```http
+POST /chapters
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "comicId": "comic-id",
+  "number": 1,
+  "title": "Chương 1",
+  "images": [
+    "http://localhost:3001/uploads/page1.jpg",
+    "http://localhost:3001/uploads/page2.jpg"
+  ]
 }
 ```
 
@@ -463,48 +1039,197 @@ Content-Type: multipart/form-data
 file: [binary]
 ```
 
+**Response**:
+```json
+{
+  "id": "media-id",
+  "url": "http://localhost:3001/uploads/1769765685319-726631160.jpeg",
+  "filename": "1769765685319-726631160.jpeg",
+  "mimeType": "image/jpeg",
+  "size": 4065984,
+  "createdAt": "2026-01-30T13:21:25.319Z"
+}
+```
+
 #### Get Media List
 ```http
 GET /media?page=1&limit=24&search=keyword
 Authorization: Bearer {token}
 ```
 
-## 🔧 Troubleshooting
+### Categories
 
-### Lỗi kết nối MongoDB
-
-**Vấn đề**: `MongoServerError: connect ECONNREFUSED`
-
-**Giải pháp**:
-```bash
-# Kiểm tra MongoDB đang chạy
-# Windows
-net start MongoDB
-
-# macOS/Linux
-sudo systemctl status mongod
-
-# Nếu chưa chạy, khởi động:
-sudo systemctl start mongod
+#### Get All Categories
+```http
+GET /categories
 ```
 
-### Lỗi Port đã được sử dụng
+#### Create Category (Admin only)
+```http
+POST /categories
+Authorization: Bearer {token}
+Content-Type: application/json
 
-**Vấn đề**: `Error: listen EADDRINUSE: address already in use :::3001`
+{
+  "name": "Action",
+  "slug": "action",
+  "parentId": null
+}
+```
+
+### Tags
+
+#### Get All Tags
+```http
+GET /tags
+```
+
+#### Create Tag (Admin only)
+```http
+POST /tags
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "name": "Fantasy",
+  "slug": "fantasy"
+}
+```
+
+### Layout
+
+#### Get Header Configuration
+```http
+GET /layout/header
+```
+
+**Response**:
+```json
+{
+  "top": {
+    "left": [],
+    "center": [],
+    "right": []
+  },
+  "center": {
+    "left": [
+      {
+        "id": "block-1",
+        "type": "logo",
+        "title": "Logo",
+        "settings": {
+          "image": "logo-url",
+          "link": "/"
+        }
+      }
+    ],
+    "center": [
+      {
+        "id": "block-2",
+        "type": "menu",
+        "title": "Main Menu",
+        "settings": {
+          "menuId": "menu-id"
+        }
+      }
+    ],
+    "right": [
+      {
+        "id": "block-3",
+        "type": "search",
+        "title": "Search"
+      }
+    ]
+  },
+  "bottom": {
+    "left": [],
+    "center": [],
+    "right": []
+  }
+}
+```
+
+#### Update Header (Admin only)
+```http
+POST /layout/header
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "top": { "left": [], "center": [], "right": [] },
+  "center": { ... },
+  "bottom": { "left": [], "center": [], "right": [] }
+}
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### 1. Lỗi Kết Nối MongoDB
+
+**Triệu chứng**:
+```
+MongoServerError: connect ECONNREFUSED 127.0.0.1:27017
+```
+
+**Nguyên nhân**: MongoDB chưa chạy
 
 **Giải pháp**:
-```bash
-# Windows - Tìm và kill process
-netstat -ano | findstr :3001
-taskkill /PID <PID> /F
 
-# macOS/Linux
+**Windows**:
+```bash
+# Kiểm tra trạng thái
+net start | findstr MongoDB
+
+# Khởi động MongoDB
+net start MongoDB
+```
+
+**macOS/Linux**:
+```bash
+# Kiểm tra trạng thái
+sudo systemctl status mongod
+
+# Khởi động MongoDB
+sudo systemctl start mongod
+
+# Đặt tự động chạy khi khởi động
+sudo systemctl enable mongod
+```
+
+### 2. Lỗi Port Đã Được Sử Dụng
+
+**Triệu chứng**:
+```
+Error: listen EADDRINUSE: address already in use :::3001
+```
+
+**Nguyên nhân**: Port đang được process khác sử dụng
+
+**Giải pháp**:
+
+**Windows**:
+```bash
+# Tìm process đang dùng port 3001
+netstat -ano | findstr :3001
+
+# Kill process (thay <PID> bằng số PID tìm được)
+taskkill /PID <PID> /F
+```
+
+**macOS/Linux**:
+```bash
+# Tìm và kill process
 lsof -ti:3001 | xargs kill -9
 ```
 
-### Lỗi Prisma Generate
+### 3. Lỗi Prisma Generate
 
-**Vấn đề**: `Error: @prisma/client did not initialize yet`
+**Triệu chứng**:
+```
+Error: @prisma/client did not initialize yet
+```
 
 **Giải pháp**:
 ```bash
@@ -513,21 +1238,37 @@ npx prisma generate
 npm run start:dev
 ```
 
-### Lỗi CORS
+### 4. Lỗi CORS
 
-**Vấn đề**: `Access to fetch at 'http://localhost:3001' from origin 'http://localhost:5173' has been blocked by CORS policy`
+**Triệu chứng**:
+```
+Access to fetch at 'http://localhost:3001' from origin 'http://localhost:5173' 
+has been blocked by CORS policy
+```
 
-**Giải pháp**: Kiểm tra file `backend/.env` có đúng cấu hình:
+**Giải pháp**: Kiểm tra file `backend/.env`:
 ```env
 ALLOWED_ORIGINS="http://localhost:3000,http://localhost:3002,http://localhost:5173"
 ```
 
-### Hình ảnh không hiển thị
+Restart backend sau khi sửa.
 
-**Vấn đề**: Uploaded images return 404
+### 5. Hình Ảnh Không Hiển Thị
+
+**Triệu chứng**: Uploaded images return 404
+
+**Nguyên nhân**: 
+- Thư mục uploads không tồn tại
+- Helmet blocking cross-origin resources
 
 **Giải pháp**:
-1. Kiểm tra thư mục `backend/uploads` tồn tại
+
+1. Tạo thư mục uploads:
+```bash
+cd backend
+mkdir uploads
+```
+
 2. Kiểm tra cấu hình Helmet trong `backend/src/main.ts`:
 ```typescript
 app.use(helmet({
@@ -535,11 +1276,15 @@ app.use(helmet({
 }));
 ```
 
-### Build Production
+3. Restart backend
+
+### 6. Lỗi Build Production
 
 #### Backend
 ```bash
 cd backend
+rm -rf dist node_modules
+npm install
 npm run build
 npm run start:prod
 ```
@@ -547,6 +1292,8 @@ npm run start:prod
 #### Frontend
 ```bash
 cd frontend
+rm -rf .next node_modules
+npm install
 npm run build
 npm start
 ```
@@ -554,23 +1301,113 @@ npm start
 #### CMS
 ```bash
 cd cms
+rm -rf dist node_modules
+npm install
 npm run build
 npm run preview
 ```
 
-## 🤝 Contributing
+### 7. Lỗi JWT Token Invalid
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+**Triệu chứng**:
+```json
+{
+  "statusCode": 401,
+  "message": "Unauthorized"
+}
+```
 
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+**Nguyên nhân**: Token hết hạn hoặc không hợp lệ
+
+**Giải pháp**:
+1. Đăng xuất và đăng nhập lại
+2. Kiểm tra `JWT_SECRET` trong `.env` backend
+3. Clear localStorage trong browser (F12 → Application → Local Storage → Clear)
+
+### 8. Lỗi Upload File
+
+**Triệu chứng**: Upload file thất bại
+
+**Nguyên nhân**:
+- File quá lớn (>10MB)
+- Định dạng không hỗ trợ
+- Thiếu quyền ghi thư mục uploads
+
+**Giải pháp**:
+
+1. Kiểm tra kích thước file (<10MB)
+2. Chỉ upload JPG, PNG, WEBP
+3. Cấp quyền ghi cho thư mục uploads:
+
+**Windows**:
+```bash
+icacls backend\uploads /grant Users:F
+```
+
+**macOS/Linux**:
+```bash
+chmod 755 backend/uploads
+```
+
+---
+
+## 🚀 Deploy Production
+
+### Backend (NestJS)
+
+**Sử dụng PM2**:
+```bash
+npm install -g pm2
+cd backend
+npm run build
+pm2 start dist/main.js --name "site-comics-api"
+pm2 save
+pm2 startup
+```
+
+**Environment Variables**:
+```env
+NODE_ENV=production
+DATABASE_URL="mongodb://your-production-db"
+JWT_SECRET="your-production-secret"
+API_URL="https://api.yoursite.com"
+ALLOWED_ORIGINS="https://yoursite.com"
+```
+
+### Frontend (Next.js)
+
+**Vercel** (Recommended):
+1. Push code lên GitHub
+2. Import project vào Vercel
+3. Set environment variables
+4. Deploy
+
+**Manual**:
+```bash
+cd frontend
+npm run build
+npm start
+```
+
+### CMS (React)
+
+**Build static files**:
+```bash
+cd cms
+npm run build
+```
+
+Deploy thư mục `dist/` lên:
+- Netlify
+- Vercel
+- AWS S3 + CloudFront
+- Nginx
+
+---
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ## 👥 Authors
 
@@ -579,11 +1416,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - NestJS Team
-- Next.js Team
+- Next.js Team  
 - React Team
 - Prisma Team
-- All contributors and users of this project
+- MongoDB Team
 
 ---
 
-**⭐ Nếu project này hữu ích, đừng quên cho một star nhé!**
+**⭐ Nếu project này hữu ích, đừng quên cho một star trên GitHub!**
+
+**📧 Liên hệ**: Nếu có vấn đề, hãy tạo issue trên GitHub hoặc liên hệ qua email.
