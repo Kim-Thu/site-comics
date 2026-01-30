@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary-rgb: 99, 102, 241; /* Default Indigo */
+    --primary: rgb(var(--primary-rgb));
+    --primary-light: rgba(var(--primary-rgb), 0.8);
+    --primary-dark: rgba(var(--primary-rgb), 0.9);
+  }
+
+  body {
+    @apply bg-[#070708] text-[#f4f4f5] font-inter antialiased overflow-x-hidden m-0 p-0;
+  }
+}
+
+/* ========================================
+   DYNAMIC THEMING OVERRIDES FOR CMS
+   ======================================== */
+
+/* Background colors */
+.bg-indigo-400 { background-color: rgba(var(--primary-rgb), 0.8) !important; }
+.bg-indigo-500 { background-color: rgb(var(--primary-rgb)) !important; }
+.bg-indigo-600 { background-color: rgba(var(--primary-rgb), 0.9) !important; }
+.bg-indigo-700 { background-color: rgba(var(--primary-rgb), 0.95) !important; }
+
+/* Background opacities */
+.bg-indigo-500\/5 { background-color: rgba(var(--primary-rgb), 0.05) !important; }
+.bg-indigo-500\/10 { background-color: rgba(var(--primary-rgb), 0.1) !important; }
+.bg-indigo-500\/20 { background-color: rgba(var(--primary-rgb), 0.2) !important; }
+.bg-indigo-500\/30 { background-color: rgba(var(--primary-rgb), 0.3) !important; }
+.bg-indigo-500\/40 { background-color: rgba(var(--primary-rgb), 0.4) !important; }
+.bg-indigo-500\/60 { background-color: rgba(var(--primary-rgb), 0.6) !important; }
+
+/* Text colors */
+.text-indigo-400 { color: rgba(var(--primary-rgb), 0.8) !important; }
+.text-indigo-500 { color: rgb(var(--primary-rgb)) !important; }
+.text-indigo-600 { color: rgba(var(--primary-rgb), 0.9) !important; }
+
+/* Border colors */
+.border-indigo-500 { border-color: rgb(var(--primary-rgb)) !important; }
+.border-indigo-500\/5 { border-color: rgba(var(--primary-rgb), 0.05) !important; }
+.border-indigo-500\/10 { border-color: rgba(var(--primary-rgb), 0.1) !important; }
+.border-indigo-500\/20 { border-color: rgba(var(--primary-rgb), 0.2) !important; }
+.border-indigo-500\/30 { border-color: rgba(var(--primary-rgb), 0.3) !important; }
+.border-indigo-500\/40 { border-color: rgba(var(--primary-rgb), 0.4) !important; }
+.border-indigo-500\/50 { border-color: rgba(var(--primary-rgb), 0.5) !important; }
+.border-b-2.border-indigo-500 { border-bottom-color: rgb(var(--primary-rgb)) !important; }
+
+/* Hover & Focus */
+.hover\:bg-indigo-600:hover { background-color: rgba(var(--primary-rgb), 0.9) !important; }
+.hover\:bg-indigo-500\/5:hover { background-color: rgba(var(--primary-rgb), 0.05) !important; }
+.hover\:bg-indigo-500\/10:hover { background-color: rgba(var(--primary-rgb), 0.1) !important; }
+.hover\:text-indigo-400:hover { color: rgba(var(--primary-rgb), 0.8) !important; }
+.hover\:text-indigo-500:hover { color: rgb(var(--primary-rgb)) !important; }
+.hover\:border-indigo-500\/30:hover { border-color: rgba(var(--primary-rgb), 0.3) !important; }
+.hover\:border-indigo-500\/40:hover { border-color: rgba(var(--primary-rgb), 0.4) !important; }
+.hover\:border-indigo-500\/50:hover { border-color: rgba(var(--primary-rgb), 0.5) !important; }
+.focus\:border-indigo-500:focus { border-color: rgb(var(--primary-rgb)) !important; }
+.focus-within\:border-indigo-500\/50:focus-within { border-color: rgba(var(--primary-rgb), 0.5) !important; }
+
+/* Shadow */
+.shadow-indigo-500\/20 { --tw-shadow-color: rgba(var(--primary-rgb), 0.2) !important; }
+.shadow-indigo-500\/30 { --tw-shadow-color: rgba(var(--primary-rgb), 0.3) !important; }
+.shadow-indigo-500\/40 { --tw-shadow-color: rgba(var(--primary-rgb), 0.4) !important; }
+.shadow-lg.shadow-indigo-500\/20 { box-shadow: 0 10px 15px -3px rgba(var(--primary-rgb), 0.2), 0 4px 6px -4px rgba(var(--primary-rgb), 0.2) !important; }
+.shadow-2xl.shadow-indigo-500\/20 { box-shadow: 0 25px 50px -12px rgba(var(--primary-rgb), 0.2) !important; }
+.shadow-2xl.shadow-indigo-500\/30 { box-shadow: 0 25px 50px -12px rgba(var(--primary-rgb), 0.3) !important; }
+
+/* Others */
+.accent-indigo-500 { accent-color: rgb(var(--primary-rgb)) !important; }
+.decoration-indigo-500 { text-decoration-color: rgb(var(--primary-rgb)) !important; }
+.from-indigo-500 { --tw-gradient-from: rgb(var(--primary-rgb)) !important; }
+.group-hover\:text-indigo-400:hover { color: rgba(var(--primary-rgb), 0.8) !important; }
+.group-hover\:bg-indigo-500\/10:hover { background-color: rgba(var(--primary-rgb), 0.1) !important; }
+.group-focus-within\:text-indigo-500:focus-within { color: rgb(var(--primary-rgb)) !important; }
+

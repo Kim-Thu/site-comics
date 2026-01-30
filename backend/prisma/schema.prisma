@@ -1,0 +1,307 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+
+model User {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  email             String    @unique
+  password          String
+  name              String?
+  avatar            String?
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  bookmarks         String[]  @db.ObjectId // References to Comic IDs
+  notifications     Notification[]
+  activityLogs      ActivityLog[]
+  status            UserStatus @default(ACTIVE)
+  
+  createdComics     Comic[]    @relation("CreatedComics")
+  uploads           Media[]
+  pages             Page[]
+
+  roleId            String?    @db.ObjectId
+  userRole          Role?      @relation(fields: [roleId], references: [id])
+  
+  // Deprecating enum role in favor of userRole, but keeping for backup/migration
+  role              RoleEnum   @default(USER) 
+
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+}
+
+enum RoleEnum {
+  USER
+  ADMIN
+}
+
+// Renaming existing Role enum to RoleEnum to avoid conflict with model Role
+// Prisma might complain if I change enum name used in DB. MongoDB uses string, so it's fine.
+// Actually, 'Role' was the enum name. I'll rename existing enum to 'RoleType' or just use 'RoleModel' for model.
+// User wants "Role". Let's name model "UserRole" or "PermissionRole"? 
+// Best is model "Role" and enum "UserRoleType".
+// To minimize conflict, I will comment out the old enum and use string or map it.
+// The existing schema has `enum Role { USER ADMIN }`.
+// I will change it to `enum SystemRole`.
+
+model Role {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   @unique
+  description String?
+  permissions String[]
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+}
+
+model ActivityLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  details   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model Comic {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  slug        String     @unique
+  searchTitle String     @default("") // Normalized title for search (lowercase, no accents)
+  thumbnail   String
+  banner      String?
+  description String?
+  author      String?
+  creatorId   String?    @db.ObjectId
+  creator     User?      @relation("CreatedComics", fields: [creatorId], references: [id])
+  status      String     @default("ongoing") // ongoing, completed, hiatus
+  rating      Float      @default(0)
+  views       Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  chapterIds  String[]   @db.ObjectId
+  chapters    Chapter[]
+  categoryIds String[]   @db.ObjectId
+  categories  Category[] @relation(fields: [categoryIds], references: [id])
+  tagIds      String[]   @db.ObjectId
+  tags        Tag[]      @relation(fields: [tagIds], references: [id])
+}
+
+model Tag {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  name     String   @unique
+  slug     String   @unique
+  comicIds String[] @db.ObjectId
+  comics   Comic[]  @relation(fields: [comicIds], references: [id])
+}
+
+model Chapter {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  number    Float
+  title     String?
+  slug      String
+  images    String[] // Array of image URLs
+  comicId   String   @db.ObjectId
+  comic     Comic    @relation(fields: [comicId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([comicId, number])
+  @@unique([comicId, slug])
+}
+
+model Category {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String     @unique
+  slug      String     @unique
+  comicIds  String[]   @db.ObjectId
+  comics    Comic[]    @relation(fields: [comicIds], references: [id])
+  parentId  String?    @db.ObjectId
+  parent    Category?  @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children  Category[] @relation("CategoryToCategory")
+}
+
+model SiteSettings {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  siteName     String   @default("TruyenMoi")
+  siteDomain   String?
+  logo         String?
+  favicon      String?
+  accentColor  String   @default("#6366f1")
+  
+  // Contact & Social
+  contactEmail String?
+  facebookUrl  String?
+  discordUrl   String?
+  telegramUrl  String?
+  
+  // Layout Config
+  footerText   String?  @default("© 2026 TruyenMoi. All rights reserved.")
+  showSidebar  Boolean  @default(true)
+  itemsPerPage Int      @default(20)
+  
+  updatedAt    DateTime @updatedAt
+}
+
+model SeoSettings {
+  id                   String   @id @default(auto()) @map("_id") @db.ObjectId
+  // Home Page
+  homeTitle            String   @default("TruyenMoi - Đọc Truyện Tranh Online")
+  homeDescription      String   @default("Website đọc truyện tranh online hàng đầu, cập nhật nhanh nhất các bộ truyện Manhwa, Manga, Manhua.")
+  
+  // Comic Detail Template
+  comicTitleTemplate   String   @default("Đọc truyện %%title%% - %%author%% | TruyenMoi")
+  comicDescTemplate    String   @default("Đọc truyện %%title%% online mới nhất tại TruyenMoi. %%description%%")
+  
+  // Genre/Category Page Template
+  genreTitleTemplate   String   @default("Truyện %%genre%% hay nhất | TruyenMoi")
+  genreDescTemplate    String   @default("Tuyển tập truyện thể loại %%genre%% cập nhật liên tục và nhanh nhất.")
+  
+  // Chapter Page Template
+  chapterTitleTemplate String   @default("%%title%% - Chương %%chapter%% | TruyenMoi")
+  
+  // Common Settings
+  globalKeywords       String[] @default(["truyen tranh", "doc truyen", "manhwa", "manga"])
+  ogImage              String   @default("/images/cover1.png")
+  twitterHandle        String   @default("@TruyenMoi")
+  googleVerifyCode     String?
+  updatedAt            DateTime @updatedAt
+}
+
+model Media {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  url       String
+  filename  String
+  mimeType  String?
+  size      Int?
+  caption   String?
+  alt       String?
+  
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Menu {
+  id        String     @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  locations String[]   
+  items     MenuItem[]
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model MenuItem {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  menuId      String   @db.ObjectId
+  menu        Menu     @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  
+  parentId    String?  @db.ObjectId
+  parent      MenuItem? @relation("MenuHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children    MenuItem[] @relation("MenuHierarchy")
+
+  type        String   
+  referenceId String?  
+  
+  title       String   
+  url         String?  
+  target      String?  
+  
+  icon        String?  
+  displayMode String   @default("TEXT_ICON") // TEXT, ICON, TEXT_ICON
+  iconSize    String   @default("NORMAL")    // NORMAL, FULL, LARGE
+  
+  order       Int      @default(0)
+}
+
+model Redirect {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  fromPath    String   @unique
+  toPath      String
+  type        String   @default("301") // 301 (permanent) or 302 (temporary)
+  isActive    Boolean  @default(true)
+  hits        Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Page {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  slug        String   @unique
+  content     String   // HTML content
+  excerpt     String?
+  featuredImage String?
+  
+  // SEO
+  metaTitle       String?
+  metaDescription String?
+  metaKeywords    String?
+  
+  // Settings
+  template    String   @default("default") // default, full-width, landing
+  isPublished Boolean  @default(false)
+  showInMenu  Boolean  @default(false)
+  
+  // Author
+  authorId    String   @db.ObjectId
+  author      User     @relation(fields: [authorId], references: [id])
+  
+  views       Int      @default(0)
+  publishedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model LayoutSection {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String   // "header", "footer", "sidebar"
+  type        String   // "header", "footer", "sidebar"
+  isActive    Boolean  @default(true)
+  
+  // Layout structure (JSON)
+  structure   String   // JSON string containing drag-drop layout
+  
+  // Styling
+  backgroundColor String?
+  textColor       String?
+  padding         String?
+  customCSS       String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@unique([type, name])
+}
+
