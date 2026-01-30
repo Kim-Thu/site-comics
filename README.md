@@ -41,6 +41,16 @@
 ✅ **SEO friendly**: Meta tags động, sitemap tự động  
 ✅ **Responsive**: Hoạt động mượt mà trên mọi thiết bị  
 
+## 📸 Screenshots
+
+### Frontend - Trang Chủ
+![Frontend Homepage](docs/images/frontend-homepage.png)
+*Giao diện trang chủ với hero banner, danh sách truyện mới cập nhật và thể loại phổ biến*
+
+### CMS - Bảng Điều Khiển
+![CMS Dashboard](docs/images/cms-dashboard.png)
+*Giao diện quản trị với danh sách truyện, tìm kiếm, lọc và các thao tác quản lý*
+
 ---
 
 ## 🏗 Kiến Trúc Hệ Thống
