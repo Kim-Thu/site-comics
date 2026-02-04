@@ -4,10 +4,10 @@ import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { Comic } from '../../core/interfaces';
 import { comicService } from '../../infrastructure/api.service';
-import Accordion from '../components/Accordion';
+import Accordion from '../components/atoms/Accordion';
+import PageHeader from '../components/atoms/PageHeader';
+import SearchInput from '../components/atoms/SearchInput';
 import ConfirmModal from '../components/ConfirmModal';
-import PageHeader from '../components/PageHeader';
-import SearchInput from '../components/SearchInput';
 import { TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../components/Table';
 
 const ComicsManager = () => {

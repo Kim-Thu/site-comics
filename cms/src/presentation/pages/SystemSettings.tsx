@@ -1,4 +1,4 @@
-import { Globe, Mail, Palette, Save, Settings, Share2 } from 'lucide-react';
+import { Globe, Mail, Save, Settings, Share2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useSettingsStore } from '../../store/settings.store';
@@ -92,27 +92,6 @@ const SystemSettings = () => {
                             </div>
                         </div>
 
-                        <div className="space-y-2">
-                            <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest pl-1">Màu sắc chủ đạo (Accent)</label>
-                            <div className="flex gap-3">
-                                <div className="relative flex-1">
-                                    <Palette size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600" />
-                                    <input
-                                        type="text"
-                                        className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-zinc-100 focus:outline-none focus:border-indigo-500 transition-all text-sm font-mono"
-                                        placeholder="#6366f1"
-                                        value={localSettings.accentColor || ''}
-                                        onChange={(e) => setLocalSettings({ ...localSettings, accentColor: e.target.value })}
-                                    />
-                                </div>
-                                <input
-                                    type="color"
-                                    className="w-14 h-[46px] bg-white/[0.03] border border-white/10 rounded-xl p-1 cursor-pointer"
-                                    value={localSettings.accentColor || '#6366f1'}
-                                    onChange={(e) => setLocalSettings({ ...localSettings, accentColor: e.target.value })}
-                                />
-                            </div>
-                        </div>
 
                         <div className="space-y-2">
                             <label className="text-xs font-bold text-zinc-500 uppercase tracking-widest pl-1">Email liên hệ</label>

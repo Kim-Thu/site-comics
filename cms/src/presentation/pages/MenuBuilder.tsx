@@ -19,21 +19,27 @@ import { CSS } from '@dnd-kit/utilities';
 import {
     ArrowLeft,
     ArrowRight,
+    Check,
     ChevronDown,
     ChevronRight,
     Edit,
     GripVertical,
     Image as ImageIcon,
+    Link as LinkIcon,
     Plus,
     Save,
     Trash2,
+    Type,
     X
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../infrastructure/api.service';
-import CustomSelect from '../components/CustomSelect';
+import Button from '../components/atoms/Button';
+import CustomSelect from '../components/atoms/CustomSelect';
+import SearchInput from '../components/atoms/SearchInput';
+import Tabs from '../components/atoms/Tabs';
 import MediaPickerModal from '../components/MediaPickerModal';
 
 interface MenuItem {
@@ -229,6 +235,11 @@ const MenuBuilder = () => {
     const [overId, setOverId] = useState<string | null>(null);
     const [dropPosition, setDropPosition] = useState<DropPosition | null>(null);
 
+    // New State for Right Panel
+    const [selectedItems, setSelectedItems] = useState<string[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [customLinkState, setCustomLinkState] = useState({ text: '', url: '' });
+
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
         useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -240,6 +251,8 @@ const MenuBuilder = () => {
 
     useEffect(() => {
         fetchSourceItems();
+        setSelectedItems([]);
+        setSearchTerm('');
     }, [activeTab]);
 
     const fetchMenu = async () => {
@@ -517,12 +530,17 @@ const MenuBuilder = () => {
     };
 
     // ============ CRUD ============
-    const addCustomLink = () => {
+    const handleAddCustomLink = () => {
+        if (!customLinkState.text || !customLinkState.url) {
+            toast.error('Vui lòng nhập tên và đường dẫn');
+            return;
+        }
+
         const newItem: MenuItem = {
             tempId: `temp-${Date.now()}`,
             type: 'CUSTOM',
-            title: 'Link mới',
-            url: '#',
+            title: customLinkState.text,
+            url: customLinkState.url,
             target: '_self',
             displayMode: 'TEXT_ICON',
             iconSize: 'NORMAL',
@@ -530,21 +548,35 @@ const MenuBuilder = () => {
             children: [],
         };
         setItems([...items, newItem]);
+        setCustomLinkState({ text: '', url: '' });
+        toast.success('Đã thêm link tùy chỉnh');
     };
 
-    const addSourceItem = (source: any) => {
-        const newItem: MenuItem = {
-            tempId: `temp-${Date.now()}`,
-            type: activeTab.toUpperCase(),
-            referenceId: source.id,
-            title: source.title || source.name,
-            displayMode: 'TEXT_ICON',
-            iconSize: 'NORMAL',
-            order: items.length,
-            children: [],
-        };
-        setItems([...items, newItem]);
-        toast.success(`Đã thêm "${newItem.title}"`);
+    const handleAddSelected = () => {
+        if (selectedItems.length === 0) return;
+
+        const itemsToAdd = sourceItems
+            .filter(source => selectedItems.includes(source.id.toString()))
+            .map((source, index) => ({
+                tempId: `temp-${Date.now()}-${index}`,
+                type: activeTab.toUpperCase(),
+                referenceId: source.id,
+                title: source.title || source.name,
+                displayMode: 'TEXT_ICON',
+                iconSize: 'NORMAL',
+                order: items.length + index,
+                children: [],
+            }));
+
+        setItems([...items, ...itemsToAdd]);
+        setSelectedItems([]);
+        toast.success(`Đã thêm ${itemsToAdd.length} mục`);
+    };
+
+    const toggleSelection = (id: string) => {
+        setSelectedItems(prev =>
+            prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+        );
     };
 
     const deleteItem = (tempId: string) => {
@@ -630,118 +662,216 @@ const MenuBuilder = () => {
     };
 
     return (
-        <div className="grid grid-cols-3 gap-6 h-[calc(100vh-100px)] font-inter">
-            {/* Left: Menu Structure */}
-            <div className="col-span-2 flex flex-col gap-4">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <h1 className="text-2xl font-bold text-white font-outfit">{menu?.name || 'Menu'}</h1>
-                        <p className="text-zinc-500 text-xs">
-                            Kéo vào <span className="text-indigo-400 font-bold">giữa item</span> để tạo submenu •
-                            Kéo vào <span className="text-indigo-400 font-bold">trên/dưới</span> để sắp xếp
-                        </p>
+        <div className="grid grid-cols-12 gap-8 h-[calc(100vh-100px)] font-inter pb-8">
+            {/* Left Column: Add Items (col-span-4) */}
+            <div className="col-span-4 flex flex-col gap-8 h-full overflow-hidden">
+                {/* Panel 1: Select Items */}
+                <div className="bg-[#111114] bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 flex flex-col h-[60%] shadow-2xl">
+                    <div className="mb-6 flex-shrink-0">
+                        <h2 className="text-lg font-bold text-white font-outfit uppercase tracking-tight flex items-center gap-2">
+                            <Plus size={20} className="text-indigo-500" />
+                            Thêm vào Menu
+                        </h2>
                     </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => navigate('/menus')}
-                            className="px-4 py-2 text-zinc-400 hover:text-white transition-colors"
+
+                    {/* Tabs */}
+                    <Tabs
+                        tabs={[
+                            { id: 'categories', label: 'Thể loại' },
+                            { id: 'comics', label: 'Truyện' },
+                            { id: 'pages', label: 'Trang' }
+                        ]}
+                        activeTab={activeTab}
+                        onChange={(id) => setActiveTab(id)}
+                    />
+
+                    {/* Search */}
+                    <div className="mb-4 flex-shrink-0">
+                        <SearchInput
+                            value={searchTerm}
+                            onChange={setSearchTerm}
+                            placeholder="Tìm kiếm mục..."
+                            className="w-full max-w-none"
+                        />
+                    </div>
+
+                    {/* List */}
+                    <div className="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar min-h-0">
+                        {sourceItems
+                            .filter(item => (item.title || item.name).toLowerCase().includes(searchTerm.toLowerCase()))
+                            .map(source => {
+                                const isSelected = selectedItems.includes(source.id.toString());
+                                return (
+                                    <div
+                                        key={source.id}
+                                        onClick={() => toggleSelection(source.id.toString())}
+                                        className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${isSelected
+                                            ? 'bg-indigo-500/10 border-indigo-500/50'
+                                            : 'bg-white/[0.03] border-transparent hover:border-white/10 hover:bg-white/[0.05]'
+                                            }`}
+                                    >
+                                        <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 ${isSelected
+                                            ? 'bg-indigo-500 border-indigo-500 shadow-lg shadow-indigo-500/40'
+                                            : 'border-white/10 bg-black/40'
+                                            }`}>
+                                            {isSelected && <Check size={12} className="text-white" strokeWidth={3} />}
+                                        </div>
+                                        <span className={`text-sm font-medium truncate ${isSelected ? 'text-white' : 'text-zinc-400'}`}>
+                                            {source.title || source.name}
+                                        </span>
+                                    </div>
+                                );
+                            })}
+                    </div>
+
+                    <div className="pt-6 mt-auto flex-shrink-0">
+                        <Button
+                            onClick={handleAddSelected}
+                            disabled={selectedItems.length === 0}
+                            className="w-full"
+                            leftIcon={<Plus size={16} />}
                         >
-                            Quay lại
-                        </button>
-                        <button
-                            onClick={saveMenu}
-                            disabled={saving}
-                            className="flex items-center gap-2 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white font-medium rounded-xl shadow-lg shadow-indigo-500/20 active:scale-95 transition-all disabled:opacity-50"
-                        >
-                            <Save size={16} />
-                            {saving ? 'Đang lưu...' : 'Lưu menu'}
-                        </button>
+                            Thêm vào Menu {selectedItems.length > 0 && `(${selectedItems.length})`}
+                        </Button>
                     </div>
                 </div>
 
-                {/* Menu Items */}
-                <div className="flex-1 bg-[#0a0a0c] rounded-2xl border border-white/10 p-4 overflow-y-auto">
-                    {loading ? (
-                        <div className="text-zinc-500 text-center py-10">Đang tải...</div>
-                    ) : items.length === 0 ? (
-                        <div className="text-zinc-500 text-center py-10">
-                            Chưa có menu item. Thêm từ panel bên phải.
+                {/* Panel 2: Custom Link */}
+                <div className="bg-[#111114] bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 flex-1 flex flex-col shadow-2xl">
+                    <div className="mb-6 flex-shrink-0">
+                        <h2 className="text-lg font-bold text-white font-outfit uppercase tracking-tight flex items-center gap-2">
+                            <LinkIcon size={20} className="text-pink-500" />
+                            Link tùy chỉnh
+                        </h2>
+                    </div>
+
+                    <div className="space-y-4 overflow-y-auto custom-scrollbar">
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest pl-1">Tên hiển thị</label>
+                            <div className="relative group">
+                                <Type size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-indigo-500 transition-colors" />
+                                <input
+                                    type="text"
+                                    value={customLinkState.text}
+                                    onChange={(e) => setCustomLinkState({ ...customLinkState, text: e.target.value })}
+                                    placeholder="Menu Item Text"
+                                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 transition-all font-bold"
+                                />
+                            </div>
                         </div>
-                    ) : (
-                        <DndContext
-                            sensors={sensors}
-                            collisionDetection={pointerWithin}
-                            onDragStart={handleDragStart}
-                            onDragOver={handleDragOver}
-                            onDragEnd={handleDragEnd}
-                        >
-                            <SortableContext
-                                items={flatItemsForContext.map(i => i.tempId)}
-                                strategy={verticalListSortingStrategy}
+
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest pl-1">Đường dẫn</label>
+                            <div className="relative group">
+                                <LinkIcon size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 group-focus-within:text-indigo-500 transition-colors" />
+                                <input
+                                    type="text"
+                                    value={customLinkState.url}
+                                    onChange={(e) => setCustomLinkState({ ...customLinkState, url: e.target.value })}
+                                    placeholder="https://example.com"
+                                    className="w-full bg-white/[0.03] border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-sm text-zinc-100 focus:outline-none focus:border-indigo-500 transition-all font-mono"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="pt-2">
+                            <Button
+                                onClick={handleAddCustomLink}
+                                variant="outline"
+                                className="w-full"
+                                leftIcon={<Plus size={16} />}
                             >
-                                {items.map((item, index) => (
-                                    <SortableMenuItem
-                                        key={item.tempId}
-                                        item={item}
-                                        depth={0}
-                                        onEdit={setEditingItem}
-                                        onDelete={deleteItem}
-                                        onToggle={toggleCollapse}
-                                        onIndent={handleIndent}
-                                        onOutdent={handleOutdent}
-                                        canIndent={index > 0}
-                                        canOutdent={false}
-                                        isDragging={!!activeId}
-                                        dropPosition={overId === item.tempId ? dropPosition : null}
-                                    />
-                                ))}
-                            </SortableContext>
-                        </DndContext>
-                    )}
+                                Thêm Link
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Right: Add Items */}
-            <div className="flex flex-col gap-4">
-                <div className="bg-[#0a0a0c] rounded-2xl border border-white/10 p-4">
-                    <h2 className="text-lg font-bold text-white mb-4">Thêm mục menu</h2>
+            {/* Right Column: Menu Structure (col-span-8) */}
+            <div className="col-span-8 flex flex-col gap-8">
 
-                    {/* Custom Link */}
-                    <button
-                        onClick={addCustomLink}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-500 hover:bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 active:scale-95 transition-all mb-4"
+                {/* Action Buttons moved to top */}
+                <div className="flex justify-end gap-3 flex-shrink-0">
+                    <Button
+                        onClick={() => navigate('/menus/new')}
+                        variant="outline"
                     >
-                        <Plus size={16} />
-                        Link tùy chỉnh
-                    </button>
+                        Tạo Menu mới
+                    </Button>
+                    <Button
+                        onClick={saveMenu}
+                        disabled={saving}
+                        isLoading={saving}
+                        leftIcon={!saving ? <Save size={18} /> : undefined}
+                    >
+                        {saving ? 'Đang lưu...' : 'Lưu Menu'}
+                    </Button>
+                </div>
 
-                    {/* Source Tabs */}
-                    <div className="flex gap-2 mb-4">
-                        {['categories', 'tags', 'comics', 'pages'].map(tab => (
-                            <button
-                                key={tab}
-                                onClick={() => setActiveTab(tab)}
-                                className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === tab
-                                    ? 'bg-indigo-500/20 text-indigo-400'
-                                    : 'bg-white/5 text-zinc-400 hover:bg-white/10'
-                                    }`}
-                            >
-                                {tab === 'categories' ? 'Thể loại' : tab === 'tags' ? 'Tags' : tab === 'comics' ? 'Truyện' : 'Trang'}
-                            </button>
-                        ))}
+                {/* Menu Structure Panel */}
+                <div className="bg-[#111114] bg-white/[0.02] backdrop-blur-xl rounded-2xl border border-white/[0.08] p-6 flex flex-col flex-1 overflow-hidden shadow-2xl">
+                    <div className="mb-6">
+                        <h2 className="text-lg font-bold text-white font-outfit uppercase tracking-tight flex items-center gap-2">
+                            Cấu trúc Menu
+                        </h2>
+                        <p className="text-zinc-500 text-sm">Kéo thả để sắp xếp các mục trong menu của bạn</p>
                     </div>
 
-                    {/* Source Items List */}
-                    <div className="max-h-[400px] overflow-y-auto space-y-1">
-                        {sourceItems.map(source => (
-                            <button
-                                key={source.id}
-                                onClick={() => addSourceItem(source)}
-                                className="w-full text-left px-3 py-2 text-sm text-zinc-300 hover:bg-white/5 rounded-lg transition-colors"
+                    {/* Menu Name Input */}
+                    <div className="mb-6 space-y-2">
+                        <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest pl-1">Tên Menu</label>
+                        <input
+                            type="text"
+                            value={menu?.name || ''}
+                            onChange={(e) => menu && setMenu({ ...menu, name: e.target.value })}
+                            className="w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3.5 text-zinc-100 focus:outline-none focus:border-indigo-500 transition-all font-bold"
+                            placeholder="Nhập tên menu..."
+                        />
+                    </div>
+
+                    {/* Drag & Drop List */}
+                    <div className="flex-1 overflow-y-auto bg-black/20 rounded-xl border border-white/5 p-4 custom-scrollbar">
+                        {loading ? (
+                            <div className="text-zinc-500 text-center py-10">Đang tải...</div>
+                        ) : items.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-full text-zinc-500 gap-4">
+                                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center">
+                                    <Plus size={32} className="opacity-20" />
+                                </div>
+                                <p>Chưa có menu item nào.<br />Thêm từ panel bên trái.</p>
+                            </div>
+                        ) : (
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={pointerWithin}
+                                onDragStart={handleDragStart}
+                                onDragOver={handleDragOver}
+                                onDragEnd={handleDragEnd}
                             >
-                                {source.title || source.name}
-                            </button>
-                        ))}
+                                <SortableContext
+                                    items={flatItemsForContext.map(i => i.tempId)}
+                                    strategy={verticalListSortingStrategy}
+                                >
+                                    {items.map((item, index) => (
+                                        <SortableMenuItem
+                                            key={item.tempId}
+                                            item={item}
+                                            depth={0}
+                                            onEdit={setEditingItem}
+                                            onDelete={deleteItem}
+                                            onToggle={toggleCollapse}
+                                            onIndent={handleIndent}
+                                            onOutdent={handleOutdent}
+                                            canIndent={index > 0}
+                                            canOutdent={false}
+                                            isDragging={!!activeId}
+                                            dropPosition={overId === item.tempId ? dropPosition : null}
+                                        />
+                                    ))}
+                                </SortableContext>
+                            </DndContext>
+                        )}
                     </div>
                 </div>
             </div>
@@ -763,7 +893,7 @@ const MenuBuilder = () => {
                                 <input
                                     type="text"
                                     value={editingItem.title}
-                                    onChange={(e) => setEditingItem({ ...editingItem, title: e.target.value })}
+                                    onChange={(e) => setEditingItem({ ...editingItem!, title: e.target.value })}
                                     className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-indigo-500"
                                 />
                             </div>
@@ -773,7 +903,7 @@ const MenuBuilder = () => {
                                 <input
                                     type="text"
                                     value={editingItem.url || ''}
-                                    onChange={(e) => setEditingItem({ ...editingItem, url: e.target.value })}
+                                    onChange={(e) => setEditingItem({ ...editingItem!, url: e.target.value })}
                                     className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-indigo-500"
                                 />
                             </div>
@@ -786,7 +916,7 @@ const MenuBuilder = () => {
                                         { value: '_self', label: 'Cùng tab' },
                                         { value: '_blank', label: 'Tab mới' }
                                     ]}
-                                    onChange={(value) => setEditingItem({ ...editingItem, target: value })}
+                                    onChange={(value) => setEditingItem({ ...editingItem!, target: value })}
                                 />
                             </div>
 
@@ -805,7 +935,7 @@ const MenuBuilder = () => {
                                     </button>
                                     {editingItem.icon && (
                                         <button
-                                            onClick={() => setEditingItem({ ...editingItem, icon: undefined })}
+                                            onClick={() => setEditingItem({ ...editingItem!, icon: undefined })}
                                             className="px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 hover:bg-red-500/20"
                                         >
                                             <X size={16} />
@@ -823,23 +953,24 @@ const MenuBuilder = () => {
                                         { value: 'TEXT', label: 'Chỉ Text' },
                                         { value: 'ICON', label: 'Chỉ Icon' },
                                     ]}
-                                    onChange={(value) => setEditingItem({ ...editingItem, displayMode: value })}
+                                    onChange={(value) => setEditingItem({ ...editingItem!, displayMode: value })}
                                 />
                             </div>
 
                             <div className="flex gap-2 pt-4">
-                                <button
+                                <Button
                                     onClick={() => setEditingItem(null)}
-                                    className="flex-1 px-4 py-2 bg-white/5 text-zinc-400 rounded-xl hover:bg-white/10 transition-colors"
+                                    variant="ghost"
+                                    className="flex-1"
                                 >
                                     Hủy
-                                </button>
-                                <button
-                                    onClick={() => updateItem(editingItem)}
-                                    className="flex-1 px-4 py-2 bg-indigo-500 text-white rounded-xl hover:bg-indigo-600 transition-colors"
+                                </Button>
+                                <Button
+                                    onClick={() => updateItem(editingItem!)}
+                                    className="flex-1"
                                 >
                                     Lưu thay đổi
-                                </button>
+                                </Button>
                             </div>
                         </div>
                     </div>

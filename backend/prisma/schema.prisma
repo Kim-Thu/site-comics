@@ -113,6 +113,17 @@ model Comic {
   categories  Category[] @relation(fields: [categoryIds], references: [id])
   tagIds      String[]   @db.ObjectId
   tags        Tag[]      @relation(fields: [tagIds], references: [id])
+
+  // SEO
+  metaTitle          String?
+  metaDescription    String?
+  focusKeyword       String?
+  ogTitle            String?
+  ogDescription      String?
+  ogImage            String?
+  twitterTitle       String?
+  twitterDescription String?
+  twitterImage       String?
 }
 
 model Tag {
@@ -265,9 +276,15 @@ model Page {
   featuredImage String?
   
   // SEO
-  metaTitle       String?
-  metaDescription String?
-  metaKeywords    String?
+  metaTitle          String?
+  metaDescription    String?
+  focusKeyword       String?
+  ogTitle            String?
+  ogDescription      String?
+  ogImage            String?
+  twitterTitle       String?
+  twitterDescription String?
+  twitterImage       String?
   
   // Settings
   template    String   @default("default") // default, full-width, landing

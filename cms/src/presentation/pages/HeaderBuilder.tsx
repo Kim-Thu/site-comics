@@ -36,7 +36,8 @@ import {
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { api } from '../../infrastructure/api.service';
-import CustomSelect from '../components/CustomSelect';
+import CustomCheckbox from '../components/atoms/CustomCheckbox';
+import CustomSelect from '../components/atoms/CustomSelect';
 import MediaPickerModal from '../components/MediaPickerModal';
 
 interface HeaderBlock {
@@ -479,15 +480,42 @@ const HeaderBuilder = () => {
                                     Tùy chọn hiển thị
                                 </h4>
 
-                                <label className="flex items-center justify-between group cursor-pointer">
-                                    <span className="text-sm text-zinc-400 group-hover:text-zinc-200 transition-colors">Ẩn trên thiết bị di động</span>
-                                    <input
-                                        type="checkbox"
-                                        className="w-5 h-5 accent-indigo-500 rounded-lg cursor-pointer"
-                                        checked={editingBlock.settings?.hideOnMobile || false}
-                                        onChange={e => setEditingBlock({ ...editingBlock, settings: { ...editingBlock.settings, hideOnMobile: e.target.checked } })}
-                                    />
-                                </label>
+                                <CustomCheckbox
+                                    label="Ẩn trên di động"
+                                    description="Không hiển thị thành phần này khi xem web bằng điện thoại"
+                                    checked={editingBlock.settings?.hideOnMobile || false}
+                                    onChange={val => setEditingBlock({ ...editingBlock, settings: { ...editingBlock.settings, hideOnMobile: val } })}
+                                />
+
+                                {editingBlock.type === 'logo' && (
+                                    <div className="pt-2 space-y-4">
+                                        <CustomCheckbox
+                                            label="Sử dụng Logo từ Cấu hình chung"
+                                            description="Nếu tắt, bạn có thể chọn một logo riêng cho Header này"
+                                            checked={editingBlock.settings?.useGlobalLogo !== false}
+                                            onChange={val => setEditingBlock({ ...editingBlock, settings: { ...editingBlock.settings, useGlobalLogo: val } })}
+                                        />
+
+                                        {editingBlock.settings?.useGlobalLogo === false && (
+                                            <div className="space-y-3 pt-2">
+                                                <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest pl-1">Chọn Logo riêng</label>
+                                                <button
+                                                    onClick={() => setShowMediaPicker(true)}
+                                                    className="w-full aspect-[3/1] bg-black/40 border border-dashed border-white/10 rounded-2xl overflow-hidden flex items-center justify-center group/logo hover:border-indigo-500/50 transition-all"
+                                                >
+                                                    {editingBlock.settings?.logoUrl ? (
+                                                        <img src={editingBlock.settings.logoUrl} className="w-full h-full object-contain p-4" />
+                                                    ) : (
+                                                        <div className="flex flex-col items-center gap-2 text-zinc-500 group-hover/logo:text-indigo-400">
+                                                            <ImageIcon size={24} />
+                                                            <span className="text-[10px] font-bold uppercase tracking-wider">Chọn ảnh...</span>
+                                                        </div>
+                                                    )}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
 
                                 {editingBlock.type === 'menu' && (
                                     <div className="pt-2">
@@ -604,6 +632,8 @@ const HeaderBuilder = () => {
                         const newSlides = [...(editingBlock.settings?.slides || [])];
                         newSlides[activeSlideIndex].image = url;
                         setEditingBlock({ ...editingBlock, settings: { ...editingBlock.settings, slides: newSlides } });
+                    } else if (editingBlock && editingBlock.type === 'logo') {
+                        setEditingBlock({ ...editingBlock, settings: { ...editingBlock.settings, logoUrl: url } });
                     }
                     setShowMediaPicker(false);
                     setActiveSlideIndex(null);

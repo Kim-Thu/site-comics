@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
 import { RoleEnum } from '@prisma/client';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -31,5 +31,12 @@ export class SettingsController {
   @Roles(RoleEnum.ADMIN)
   updateSeoSettings(@Body() data: any) {
     return this.settingsService.updateSeoSettings(data);
+  }
+
+  @Post('seo/reset')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(RoleEnum.ADMIN)
+  resetSeo() {
+    return this.settingsService.resetAllIndividualSeo();
   }
 }

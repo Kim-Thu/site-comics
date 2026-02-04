@@ -6,6 +6,7 @@ import {
     Hash,
     Image as ImageIcon,
     Layout,
+    RefreshCcw,
     Save,
     Share2,
     Twitter
@@ -31,6 +32,7 @@ const SeoSettings = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [activeTab, setActiveTab] = useState('home');
+    const [resetting, setResetting] = useState(false);
 
     useEffect(() => {
         fetchSeo();
@@ -61,6 +63,22 @@ const SeoSettings = () => {
         }
     };
 
+    const handleResetAll = async () => {
+        if (!window.confirm('CẢNH BÁO: Hành động này sẽ xóa toàn bộ các tùy chỉnh SEO riêng lẻ của TỪNG trang và TỪNG bộ truyện, đưa chúng về mặc định theo cấu hình hệ thống. Bạn có chắc chắn muốn tiếp tục?')) {
+            return;
+        }
+
+        try {
+            setResetting(true);
+            await settingService.resetSeo();
+            toast.success('Đã reset toàn bộ SEO riêng lẻ về mặc định thành công');
+        } catch (error) {
+            toast.error('Reset thất bại');
+        } finally {
+            setResetting(false);
+        }
+    };
+
     if (loading) return (
         <div className="flex items-center justify-center min-h-[400px]">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
@@ -85,6 +103,15 @@ const SeoSettings = () => {
                     <AlertCircle size={14} />
                     <span>Placeholder: %%title%%, %%author%%, %%genre%%</span>
                 </div>
+                <button
+                    type="button"
+                    onClick={handleResetAll}
+                    disabled={resetting}
+                    className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 rounded-xl text-xs font-bold transition-all active:scale-95"
+                >
+                    <RefreshCcw size={14} className={resetting ? 'animate-spin' : ''} />
+                    {resetting ? 'Đang reset...' : 'Reset toàn bộ SEO cá nhân'}
+                </button>
             </div>
 
             {/* Tabs Navigation */}
@@ -281,7 +308,7 @@ const SeoSettings = () => {
                                         value={Array.isArray(seo.globalKeywords) ? seo.globalKeywords.join(', ') : seo.globalKeywords}
                                         onChange={(e) => setSeo({ ...seo, globalKeywords: e.target.value.split(',').map((s: string) => s.trim()) })}
                                     />
-                                    <p className="mt-3 text-[11px] text-zinc-500 italic">
+                                    <p className="mt-3 text-zinc-500 italic">
                                         Lưu ý: Các từ khóa này sẽ xuất hiện ở cuối trang meta keywords của tất cả các trang.
                                     </p>
                                 </div>

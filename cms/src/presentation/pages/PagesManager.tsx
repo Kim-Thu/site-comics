@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../infrastructure/api.service';
-import Accordion from '../components/Accordion';
+import Accordion from '../components/atoms/Accordion';
+import PageHeader from '../components/atoms/PageHeader';
+import SearchInput from '../components/atoms/SearchInput';
 import ConfirmModal from '../components/ConfirmModal';
-import PageHeader from '../components/PageHeader';
-import SearchInput from '../components/SearchInput';
 import { TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../components/Table';
 
 interface Page {
@@ -202,8 +202,8 @@ const PagesManager = () => {
                                                     key={page.id}
                                                     onClick={(e) => handleRowClick(page, index, e)}
                                                     className={`cursor-pointer ${isSelected
-                                                            ? 'bg-indigo-500/10 border-indigo-500/30'
-                                                            : ''
+                                                        ? 'bg-indigo-500/10 border-indigo-500/30'
+                                                        : ''
                                                         }`}
                                                 >
                                                     <TableCell>

@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { chapterService, comicService } from '../../infrastructure/api.service';
+import PageHeader from '../components/atoms/PageHeader';
 import ConfirmModal from '../components/ConfirmModal';
-import PageHeader from '../components/PageHeader';
 import { TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../components/Table';
 
 const ChaptersManager = () => {

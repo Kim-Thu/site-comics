@@ -12,6 +12,7 @@ interface CustomSelectProps {
     options: Option[];
     label?: string;
     placeholder?: string;
+    minimal?: boolean;
 }
 
 const CustomSelect: React.FC<CustomSelectProps> = ({
@@ -19,7 +20,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
     onChange,
     options,
     label,
-    placeholder = 'Chọn...'
+    placeholder = 'Chọn...',
+    minimal = false
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const selectRef = useRef<HTMLDivElement>(null);
@@ -36,6 +38,41 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
     }, []);
 
     const selectedOption = options.find(opt => opt.value === value);
+
+    if (minimal) {
+        return (
+            <div ref={selectRef} className="relative inline-block">
+                <button
+                    type="button"
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="flex items-center gap-1.5 px-2 py-1 text-[10px] font-bold text-zinc-400 hover:text-white transition-colors outline-none"
+                >
+                    <span>{selectedOption?.label || placeholder}</span>
+                    <ChevronDown size={10} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                </button>
+                {isOpen && (
+                    <div className="absolute z-[100] right-0 mt-1 min-w-[120px] bg-[#1a1a1d] border border-white/10 rounded-lg overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+                        {options.map((option) => (
+                            <button
+                                key={option.value}
+                                type="button"
+                                onClick={() => {
+                                    onChange(option.value);
+                                    setIsOpen(false);
+                                }}
+                                className={`w-full text-left px-3 py-2 text-[10px] font-bold transition-colors ${value === option.value
+                                    ? 'bg-indigo-500 text-white'
+                                    : 'text-zinc-400 hover:bg-white/5 hover:text-white'
+                                    }`}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    }
 
     return (
         <div ref={selectRef} className="relative">
@@ -71,8 +108,8 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
                                     setIsOpen(false);
                                 }}
                                 className={`w-full text-left px-4 py-3 text-sm transition-colors ${value === option.value
-                                        ? 'bg-indigo-500/20 text-indigo-400 font-medium'
-                                        : 'text-zinc-300 hover:bg-white/5'
+                                    ? 'bg-indigo-500/20 text-indigo-400 font-medium'
+                                    : 'text-zinc-300 hover:bg-white/5'
                                     }`}
                             >
                                 {option.label}

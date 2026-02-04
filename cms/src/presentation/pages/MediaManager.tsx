@@ -2,10 +2,10 @@ import { Check, Copy, Image as ImageIcon, Trash2, Upload, X } from 'lucide-react
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { mediaService } from '../../infrastructure/api.service';
-import Accordion from '../components/Accordion';
+import Accordion from '../components/atoms/Accordion';
+import PageHeader from '../components/atoms/PageHeader';
+import SearchInput from '../components/atoms/SearchInput';
 import ConfirmModal from '../components/ConfirmModal';
-import PageHeader from '../components/PageHeader';
-import SearchInput from '../components/SearchInput';
 
 interface Media {
     id: string;

@@ -49,3 +49,7 @@ backend/uploads/*
 .turbo
 .vercel
 .cache
+
+# Misc
+*.sh
+*.ps1

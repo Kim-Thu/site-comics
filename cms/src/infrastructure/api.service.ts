@@ -164,6 +164,11 @@ export class SettingService implements ISettingService {
     const res = await api.patch('/settings/seo', data);
     return res.data;
   }
+
+  async resetSeo(): Promise<any> {
+    const res = await api.post('/settings/seo/reset');
+    return res.data;
+  }
 }
 
 // Dependency Injection Registry

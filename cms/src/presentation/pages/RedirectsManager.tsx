@@ -2,11 +2,11 @@ import { ArrowRight, Edit2, Plus, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { api } from '../../infrastructure/api.service';
+import CustomCheckbox from '../components/atoms/CustomCheckbox';
+import CustomSelect from '../components/atoms/CustomSelect';
+import PageHeader from '../components/atoms/PageHeader';
+import SearchInput from '../components/atoms/SearchInput';
 import ConfirmModal from '../components/ConfirmModal';
-import CustomCheckbox from '../components/CustomCheckbox';
-import CustomSelect from '../components/CustomSelect';
-import PageHeader from '../components/PageHeader';
-import SearchInput from '../components/SearchInput';
 import { TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../components/Table';
 
 interface Redirect {

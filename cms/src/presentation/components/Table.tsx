@@ -1,6 +1,6 @@
 import { Loader2 } from 'lucide-react';
 import React from 'react';
-import EmptyState from './EmptyState';
+import EmptyState from './atoms/EmptyState';
 
 // Main Table Container
 export const TableContainer: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (

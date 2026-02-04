@@ -10,6 +10,15 @@ export interface Comic {
   description?: string;
   categories?: { id: string, name: string }[];
   tagIds?: string[];
+  metaTitle?: string;
+  metaDescription?: string;
+  focusKeyword?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
+  twitterImage?: string;
   updatedAt: string;
 }
 
@@ -55,4 +64,5 @@ export interface ISettingService {
   updateSettings(data: any): Promise<any>;
   getSeo(): Promise<any>;
   updateSeo(data: any): Promise<any>;
+  resetSeo(): Promise<any>;
 }

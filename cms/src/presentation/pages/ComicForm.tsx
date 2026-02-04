@@ -4,8 +4,9 @@ import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { categoryService, comicService, mediaService, tagService } from '../../infrastructure/api.service';
 import { AuthState, useAuthStore } from '../../store/auth.store';
-import CustomSelect from '../components/CustomSelect';
+import CustomSelect from '../components/atoms/CustomSelect';
 import QuillEditor from '../components/QuillEditor';
+import SEOManager from '../components/SEOManager';
 
 // Utility to remove accents for better searching
 const removeAccents = (str: string) => {
@@ -41,7 +42,16 @@ const ComicForm = () => {
         status: 'ongoing',
         thumbnail: '',
         categoryIds: [] as string[],
-        tagIds: [] as string[]
+        tagIds: [] as string[],
+        metaTitle: '',
+        metaDescription: '',
+        focusKeyword: '',
+        ogTitle: '',
+        ogDescription: '',
+        ogImage: '',
+        twitterTitle: '',
+        twitterDescription: '',
+        twitterImage: '',
     });
 
     useEffect(() => {
@@ -78,7 +88,16 @@ const ComicForm = () => {
                     status: comic.status || 'ongoing',
                     thumbnail: comic.thumbnail || '',
                     categoryIds: comic.categories?.map((c: any) => c.id) || [],
-                    tagIds: comic.tagIds || []
+                    tagIds: comic.tagIds || [],
+                    metaTitle: comic.metaTitle || '',
+                    metaDescription: comic.metaDescription || '',
+                    focusKeyword: comic.focusKeyword || '',
+                    ogTitle: comic.ogTitle || '',
+                    ogDescription: comic.ogDescription || '',
+                    ogImage: comic.ogImage || '',
+                    twitterTitle: comic.twitterTitle || '',
+                    twitterDescription: comic.twitterDescription || '',
+                    twitterImage: comic.twitterImage || '',
                 });
             }
         } catch (error) {
@@ -270,6 +289,25 @@ const ComicForm = () => {
                                 placeholder="Nhập tóm tắt nội dung truyện..."
                             />
                         </div>
+
+                        {/* SEO Section */}
+                        <SEOManager
+                            data={{
+                                metaTitle: formData.metaTitle,
+                                metaDescription: formData.metaDescription,
+                                focusKeyword: formData.focusKeyword,
+                                ogTitle: formData.ogTitle,
+                                ogDescription: formData.ogDescription,
+                                ogImage: formData.ogImage,
+                                twitterTitle: formData.twitterTitle,
+                                twitterDescription: formData.twitterDescription,
+                                twitterImage: formData.twitterImage,
+                            }}
+                            defaultTitle={formData.title}
+                            defaultDescription={formData.description.substring(0, 160).replace(/<[^>]*>/g, '')}
+                            slug={formData.slug}
+                            onChange={(seoData) => setFormData({ ...formData, ...seoData })}
+                        />
                     </div>
                 </div>
 

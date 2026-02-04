@@ -2,8 +2,8 @@ import { Edit2, Loader2, Plus, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { tagService } from '../../infrastructure/api.service';
-import PageHeader from '../components/PageHeader';
-import SearchInput from '../components/SearchInput';
+import PageHeader from '../components/atoms/PageHeader';
+import SearchInput from '../components/atoms/SearchInput';
 import { TableBody, TableCell, TableContainer, TableHead, TableHeader, TableRow } from '../components/Table';
 
 const TagsManager = () => {

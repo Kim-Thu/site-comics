@@ -1,13 +1,14 @@
-import { ArrowLeft, Calendar, Edit2, Eye, Globe, Image as ImageIcon, Layout, Save, Search, Settings, X } from 'lucide-react';
+import { ArrowLeft, Calendar, Edit2, Eye, Globe, Image as ImageIcon, Layout, Save, Settings, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../../infrastructure/api.service';
-import CustomCheckbox from '../components/CustomCheckbox';
-import CustomSelect from '../components/CustomSelect';
+import CustomCheckbox from '../components/atoms/CustomCheckbox';
+import CustomSelect from '../components/atoms/CustomSelect';
 import MediaPickerModal from '../components/MediaPickerModal';
 import PreviewModal from '../components/PreviewModal';
 import QuillEditor from '../components/QuillEditor';
+import SEOManager from '../components/SEOManager';
 
 const PageForm = () => {
     const { id } = useParams();
@@ -26,17 +27,25 @@ const PageForm = () => {
         excerpt: '',
         featuredImage: '',
         isPublished: true,
+        status: 'published', // New status field
         showInMenu: false,
         template: 'default',
         metaTitle: '',
         metaDescription: '',
-        metaKeywords: '',
+        focusKeyword: '',
+        ogTitle: '',
+        ogDescription: '',
+        ogImage: '',
+        twitterTitle: '',
+        twitterDescription: '',
+        twitterImage: '',
         publishedAt: new Date().toISOString().slice(0, 16), // datetime-local format
     });
 
     const statusOptions = [
         { value: 'published', label: 'Công khai' },
-        { value: 'draft', label: 'Bản nháp' }
+        { value: 'draft', label: 'Bản nháp' },
+        { value: 'scheduled', label: 'Lên lịch' }
     ];
 
     const templateOptions = [
@@ -57,6 +66,7 @@ const PageForm = () => {
             const { data } = await api.get(`/pages/${id}`);
             setFormData({
                 ...data,
+                status: data.isPublished ? (new Date(data.publishedAt) > new Date() ? 'scheduled' : 'published') : 'draft',
                 publishedAt: data.publishedAt ? new Date(data.publishedAt).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16)
             });
         } catch (error) {
@@ -90,7 +100,11 @@ const PageForm = () => {
             setSaving(true);
             const payload = {
                 ...formData,
-                publishedAt: new Date(formData.publishedAt).toISOString()
+                publishedAt: formData.status === 'scheduled'
+                    ? new Date(formData.publishedAt).toISOString()
+                    : (formData.status === 'published' && new Date(formData.publishedAt) > new Date()
+                        ? new Date().toISOString()
+                        : new Date(formData.publishedAt).toISOString())
             };
 
             if (isEdit) {
@@ -143,8 +157,8 @@ const PageForm = () => {
 
                         <div className="min-w-[140px] border-l border-white/10 pl-3">
                             <CustomSelect
-                                value={formData.isPublished ? 'published' : 'draft'}
-                                onChange={(val) => setFormData({ ...formData, isPublished: val === 'published' })}
+                                value={formData.status || (formData.isPublished ? 'published' : 'draft')}
+                                onChange={(val) => setFormData({ ...formData, status: val, isPublished: val !== 'draft' })}
                                 options={statusOptions}
                             />
                         </div>
@@ -207,36 +221,23 @@ const PageForm = () => {
                         </div>
 
                         {/* SEO Section */}
-                        <div className="bg-[#111114] border border-white/10 rounded-3xl p-8 space-y-8">
-                            <h2 className="text-xl font-bold text-white flex items-center gap-3 font-outfit">
-                                <div className="w-10 h-10 bg-indigo-500/10 rounded-xl flex items-center justify-center">
-                                    <Search size={22} className="text-indigo-500" />
-                                </div>
-                                Tối ưu hóa SEO
-                            </h2>
-
-                            <div className="grid grid-cols-1 gap-6">
-                                <div>
-                                    <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-3">SEO Title Tag</label>
-                                    <input
-                                        type="text"
-                                        value={formData.metaTitle || ''}
-                                        onChange={(e) => setFormData({ ...formData, metaTitle: e.target.value })}
-                                        className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-4 text-sm text-white focus:border-indigo-500/50 outline-none transition-all"
-                                        placeholder="Để trống để sử dụng tiêu đề trang..."
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-3">SEO Description Tag</label>
-                                    <textarea
-                                        value={formData.metaDescription || ''}
-                                        onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
-                                        className="w-full bg-black/40 border border-white/5 rounded-xl px-4 py-4 text-sm text-zinc-400 min-h-[120px] focus:border-indigo-500/50 outline-none transition-all resize-none"
-                                        placeholder="Mô tả sẽ hiển thị trên Google Search..."
-                                    />
-                                </div>
-                            </div>
-                        </div>
+                        <SEOManager
+                            data={{
+                                metaTitle: formData.metaTitle,
+                                metaDescription: formData.metaDescription,
+                                focusKeyword: formData.focusKeyword,
+                                ogTitle: formData.ogTitle,
+                                ogDescription: formData.ogDescription,
+                                ogImage: formData.ogImage,
+                                twitterTitle: formData.twitterTitle,
+                                twitterDescription: formData.twitterDescription,
+                                twitterImage: formData.twitterImage,
+                            }}
+                            defaultTitle={formData.title}
+                            defaultDescription={formData.excerpt || formData.content.substring(0, 160).replace(/<[^>]*>/g, '')}
+                            slug={formData.slug}
+                            onChange={(seoData) => setFormData({ ...formData, ...seoData })}
+                        />
                     </div>
 
                     {/* Sidebar Settings */}
@@ -249,19 +250,21 @@ const PageForm = () => {
                             </h2>
 
                             <div className="space-y-4">
-                                <div>
-                                    <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Thời gian hiển thị</label>
-                                    <div className="relative group">
-                                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-500 transition-colors" size={16} />
-                                        <input
-                                            type="datetime-local"
-                                            value={formData.publishedAt}
-                                            onChange={(e) => setFormData({ ...formData, publishedAt: e.target.value })}
-                                            className="w-full bg-black/40 border border-white/5 rounded-xl pl-12 pr-4 py-3 text-sm text-zinc-300 outline-none focus:border-indigo-500/50 transition-all"
-                                        />
+                                {formData.status === 'scheduled' && (
+                                    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <label className="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Thời gian hiển thị</label>
+                                        <div className="relative group">
+                                            <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 group-focus-within:text-indigo-500 transition-colors" size={16} />
+                                            <input
+                                                type="datetime-local"
+                                                value={formData.publishedAt}
+                                                onChange={(e) => setFormData({ ...formData, publishedAt: e.target.value })}
+                                                className="w-full bg-black/40 border border-white/5 rounded-xl pl-12 pr-4 py-3 text-sm text-zinc-300 outline-none focus:border-indigo-500/50 transition-all font-mono"
+                                            />
+                                        </div>
+                                        <p className="text-[10px] text-zinc-600 mt-2 ml-1 italic">* Trang sẽ tự động hiển thị sau thời gian này.</p>
                                     </div>
-                                    <p className="text-[10px] text-zinc-600 mt-2 ml-1 italic">* Post sẽ tự động hiển thị sau thời gian này nếu trạng thái là Công khai.</p>
-                                </div>
+                                )}
 
                                 <CustomSelect
                                     label="Giao diện trang (Template)"

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useRoleStore } from '../../store/role.store';
 import ConfirmModal from '../components/ConfirmModal';
-import PageHeader from '../components/PageHeader';
+import PageHeader from '../components/atoms/PageHeader';
 
 const PERMISSIONS_LIST = [
     {

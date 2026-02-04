@@ -55,4 +55,39 @@ export class SettingsService {
       data: updateData,
     });
   }
+
+  async resetAllIndividualSeo() {
+    await Promise.all([
+      this.prisma.comic.updateMany({
+        data: {
+          metaTitle: null,
+          metaDescription: null,
+          focusKeyword: null,
+          ogTitle: null,
+          ogDescription: null,
+          ogImage: null,
+          twitterTitle: null,
+          twitterDescription: null,
+          twitterImage: null,
+        },
+      }),
+      this.prisma.page.updateMany({
+        data: {
+          metaTitle: null,
+          metaDescription: null,
+          focusKeyword: null,
+          ogTitle: null,
+          ogDescription: null,
+          ogImage: null,
+          twitterTitle: null,
+          twitterDescription: null,
+          twitterImage: null,
+        },
+      }),
+    ]);
+    return {
+      success: true,
+      message: 'Reset all individual SEO settings to system defaults',
+    };
+  }
 }
